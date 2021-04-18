@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Nginx RTMP Media Server</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.0/css/bootstrap.min.css"/>
+    <link href="https://vjs.zencdn.net/7.11.4/video-js.css" rel="stylesheet"/>
+
+    <style>
+    </style>
+</head>
+<body>
+
+
+<div class="container mb-2">
+
+    <h1 class="my-3 text-center text-primary">Nginx RTMP Media Server</h1>
+
+    <div class="d-flex align-items-center">
+        <div class="mr-2">Point OBS to:</div>
+        <pre class="mb-0">rtmp://<span class="hostname"></span>/live/test</pre>
+    </div>
+
+    <div class="align-items-center">
+        <div class="mr-2">or stream a file via ffmpeg</div>
+        <pre class="mb-0">ffmpeg -re -i "video.mp4" -c:v libx264 -c:a aac -preset veryfast -f flv rtmp://<span
+                class="hostname"></span>/live/test</pre>
+    </div>
+
+</div>
+
+<div class="w-full px-5">
+
+    <div class="d-flex justify-content-between mb-1">
+
+        <div>
+            <a href="http://hlsanalyzer.com" target="_blank">http://hlsanalyzer.com</a>
+            <br>
+            <a href="https://hls-js.netlify.app/demo/" target="_blank">https://hls-js.netlify.app/demo/</a>
+        </div>
+
+        <a href="/stat" target="_blank">Raw Stats</a>
+    </div>
+
+    <table id="tbl_stats" class="table table-bordered table-striped">
+        <thead class="thead-light">
+        <tr>
+            <th>Name</Th>
+            <th>Time</th>
+            <th>In bytes</th>
+            <th>In Mb/s</th>
+            <th>Video codec</th>
+            <th>fps</th>
+            <th>Audio codec</th>
+            <th>Frequency</th>
+            <th>Channels</th>
+            <th>Stream Url</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+
+        </tbody>
+    </table>
+
+</div>
+
+<div class="container mt-5 mx-auto bg-black">
+
+    <!---
+    Autoplay is only allowed when approved by the user, the site is activated by the user, or media is muted.
+    -->
+
+    <div id="video_info" class="d-none bg-dark justify-content-center align-items-center"
+         style="min-height: 300px;">
+        <h4 class="font-weight-bold text-white">Stream will start playing automatically when it is live</h4>
+    </div>
+
+    <video id="stream_video_player" class="video-js d-none">
+        <p class="vjs-no-js">
+            To view this video please enable JavaScript, and consider upgrading to a web browser that
+            <a href="https://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a>
+        </p>
+    </video>
+
+</div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://vjs.zencdn.net/7.11.4/video.min.js"></script>
+
+<script>
+
+    function button(text, classes) {
+        let btn = document.createElement('button');
+        btn.classList.add('btn', 'btn-primary', 'm-1');
+        btn.textContent = text;
+        return btn;
+    }
+
+    function sizeFormatted(bytes) {
+
+        let bytesInGb = Math.pow(1024, 3);
+        let bytesInMb = Math.pow(1000, 2);
+
+        if (bytes >= bytesInGb) {
+            return (bytes / bytesInGb).toFixed(2) + ' GB';
+        } else if (bytes >= bytesInMb) {
+            return (bytes / bytesInMb).toFixed(2) + ' MB';
+        }
+
+        return bytes + ' bytes';
+    }
+
+    function secondsFormatted(seconds) {
+        return new Date(1000 * seconds).toISOString().substr(11, 8);
+    }
+
+    function loadStats() {
+
+        $.get('/stat', function (data) {
+
+            let app = data.getElementsByTagName('application');
+
+            let live = Array.from(app).filter(function (app) {
+                let name = app.querySelector('name');
+                return name.textContent === 'live';
+            });
+
+            let appLive = live[0];
+
+            let streams = Array.from(appLive.getElementsByTagName('stream')).map(function (stream) {
+
+                let name = stream.querySelector('name').textContent;
+                let timeMs = stream.querySelector('time').textContent;
+                let bytesIn = stream.querySelector('bytes_in').textContent;
+
+                return {stream, name, timeMs, bytesIn};
+            });
+
+            let table = document.querySelector('#tbl_stats');
+
+            streams.forEach(function (stream) {
+
+                let name = stream.name;
+
+                let row = table.insertRow(-1);
+
+                row.insertCell(-1).textContent = name;
+                row.insertCell(-1).innerText = secondsFormatted(stream.timeMs / 1000);
+
+                let inBytesCell = row.insertCell(-1);
+                inBytesCell.classList.add('text-nowrap');
+                inBytesCell.textContent = sizeFormatted(stream.bytesIn);
+
+                let bytesPerSecond = stream.bytesIn / (stream.timeMs / 1000);
+
+                row.insertCell(-1).innerText = (bytesPerSecond / 125000).toFixed(3);
+
+                let video = stream.stream.querySelector('video');
+                let audio = stream.stream.querySelector('audio');
+
+                row.insertCell(-1).innerText = video.querySelector('codec').textContent;
+                row.insertCell(-1).innerText = video.querySelector('frame_rate').textContent;
+
+                row.insertCell(-1).innerText = audio.querySelector('codec').textContent;
+                row.insertCell(-1).innerText = audio.querySelector('sample_rate').textContent;
+                row.insertCell(-1).innerText = audio.querySelector('channels').textContent;
+
+                row.insertCell(-1).innerText = getPlaylistUrl(name);
+
+                // actions
+                let cellActions = row.insertCell(-1);
+
+                let btnPlay = button('Play using video.js');
+                btnPlay.onclick = function () {
+
+                    let url = getPlaylistUrl(name, 'src');
+                    play(url);
+                };
+
+                cellActions.append(btnPlay);
+
+                let btnAkamai = button('Play via Akamai');
+                btnAkamai.onclick = function () {
+                    let url = encodeURIComponent(getPlaylistUrl(name));
+                    window.open('https://players.akamai.com/players/hlsjs?streamUrl=' + url)
+                }
+
+                cellActions.append(btnAkamai);
+            });
+        });
+    }
+
+    function getPlaylistUrl(name, variant) {
+        let href = window.location.origin;
+
+        if (!variant) {
+            variant = 'src';
+        }
+
+        return href + '/hls/' + name + '/' + variant + '/index.m3u8';
+    }
+
+    $(function () {
+        $(".hostname").html(window.location.hostname);
+        loadStats();
+    });
+
+    let streamPollInterval;
+
+    function play(url) {
+
+        $("#video_info").removeClass('d-none').addClass('d-flex');
+        $("#stream_video_player").addClass('d-none');
+
+        clearInterval(streamPollInterval);
+
+        streamPollInterval = setInterval(function () {
+
+            $.ajax({
+                url: url,
+                type: 'HEAD',
+                success: function () {
+
+                    clearInterval(streamPollInterval);
+
+                    console.log('Found playlist: ' + url);
+
+                    $("#video_info").removeClass('d-flex').addClass('d-none');
+                    $("#stream_video_player").removeClass('d-none');
+
+                    showVideo(url);
+                },
+                error: function () {
+                    // not live yet...
+                }
+            });
+
+        }, 1500);
+    }
+
+    let player;
+
+    function showVideo(playlistUrl) {
+
+        if (player) {
+            // player.dispose();
+        }
+
+        player = videojs('stream_video_player', {
+            "controls": true,
+            "muted": false,
+            "autoplay": true,
+            "preload": "auto",
+            // "poster": "http://i3.ytimg.com/vi/HQt6jIKNwgU/hqdefault.jpg",
+            "width": 960,
+            "height": 540
+        });
+
+        player.on('error', function () {
+            let error = player.error();
+            alert(JSON.stringify(error));
+        });
+
+        player.src({
+            type: 'application/x-mpegURL',
+            src: playlistUrl
+        });
+
+        player.on("waiting", function () {
+            // buffering...
+        });
+
+        player.on('canplaythrough', function () {
+            // buffering has ended... we are playing now
+        });
+    }
+
+</script>
+
+</body>
+</html>
