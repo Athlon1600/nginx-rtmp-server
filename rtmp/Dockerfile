@@ -32,7 +32,7 @@ RUN tar -xvz -f "dev.tar.gz" && \
     make install
 
 COPY nginx.conf /usr/local/nginx/conf
-#COPY index.html /usr/local/nginx/html
+COPY /html /usr/local/nginx/html
 
 EXPOSE 80
 EXPOSE 1935
