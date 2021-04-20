@@ -27,7 +27,7 @@
 
     <div class="align-items-center">
         <div class="mr-2">or stream a file via ffmpeg</div>
-        <pre class="mb-0">ffmpeg -re -i "video.mp4" -c:v libx264 -c:a aac -preset veryfast -f flv rtmp://<span
+        <pre class="mb-0">ffmpeg -re -i "video.mp4" -c:v libx264 -c:a aac -b:a 128k -ar 44100 -ac 2 -preset veryfast -f flv rtmp://<span
                 class="hostname"></span>/live/test</pre>
     </div>
 
@@ -58,6 +58,7 @@
             <th>Audio codec</th>
             <th>Frequency</th>
             <th>Channels</th>
+            <th>-</th>
             <th>Stream Url</th>
             <th>Actions</th>
         </tr>
@@ -69,7 +70,7 @@
 
 </div>
 
-<div class="container mt-5 mx-auto bg-black">
+<div class="container my-5 mx-auto bg-black">
 
     <!---
     Autoplay is only allowed when approved by the user, the site is activated by the user, or media is muted.
@@ -119,9 +120,57 @@
         return new Date(1000 * seconds).toISOString().substr(11, 8);
     }
 
+    function loadImage(url, callback) {
+
+        let thumb = new Image();
+        thumb.src = url;
+
+        thumb.onload = function () {
+            callback(url);
+        }
+
+        thumb.onerror = function () {
+            callback(null);
+        }
+    }
+
+    function rtmp_server_url(path) {
+        let origin = window.location.origin;
+        return origin + '/' + path.replace(/^\/+/, '');
+    }
+
+    function api_server_url(path) {
+        path = path.replace(/^\/+/, '');
+        return 'http://' + window.location.hostname + ':3000/' + path;
+    }
+
+    function updateThumbnailForStream(name, cell) {
+
+        let url = api_server_url('/screens/' + name + '.png?ts=' + Date.now());
+
+        loadImage(url, function (url) {
+
+            if (!url) {
+                url = api_server_url('/no_thumbnail.jpg');
+            }
+
+            let image = new Image();
+            image.src = url;
+            image.width = 80;
+            image.height = 60;
+
+            cell.innerHTML = image.outerHTML;
+
+            setTimeout(function () {
+                updateThumbnailForStream(name, cell);
+            }, 5000);
+
+        });
+    }
+
     function loadStats() {
 
-        $.get('/stat', function (data) {
+        $.get(rtmp_server_url('/stat'), function (data) {
 
             let app = data.getElementsByTagName('application');
 
@@ -170,6 +219,9 @@
                 row.insertCell(-1).innerText = audio.querySelector('sample_rate').textContent;
                 row.insertCell(-1).innerText = audio.querySelector('channels').textContent;
 
+                let thumbCell = row.insertCell(-1);
+                updateThumbnailForStream(name, thumbCell);
+
                 row.insertCell(-1).innerText = getPlaylistUrl(name);
 
                 // actions
@@ -196,13 +248,12 @@
     }
 
     function getPlaylistUrl(name, variant) {
-        let href = window.location.origin;
 
         if (!variant) {
             variant = 'src';
         }
 
-        return href + '/hls/' + name + '/' + variant + '/index.m3u8';
+        return rtmp_server_url('/hls/' + name + '/' + variant + '/index.m3u8');
     }
 
     $(function () {
