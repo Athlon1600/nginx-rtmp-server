@@ -6,19 +6,21 @@ services:
     ports:
       - '1935:1935'
       - '80:80'
-#    volumes:
-#      - ./tmp:/tmp
-#      - ./rtmp/html:/usr/local/nginx/html
+    volumes:
+      - ./rtmp/html:/usr/local/nginx/html
+      - storage:/var/storage
   api_server:
     container_name: 'api_server'
     build: './api_server'
     ports:
       - '3000:3000'
-    #    volumes:
+    volumes:
+      - storage:/var/storage
     #      - ./express:/app
     #      - /app/node_modules
     environment:
       - NODE_ENV=production
-      #      - PORT=3000
-      #      - STREAM_KEY=china
+      - STORAGE=/var/storage/
       - RTMP_SERVER=rtmp
+volumes:
+  storage:

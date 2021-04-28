@@ -1,5 +1,7 @@
 import {Screenshot} from "./Screenshot";
-import {Filesystem} from "./Filesystem";
+import {Util} from "../Util";
+
+const fs = require('fs');
 
 export class ScreenshotWorker {
 
@@ -19,10 +21,17 @@ export class ScreenshotWorker {
 
         this.interval = setInterval(async function () {
 
-            let dest = Filesystem.publicPath('screens/' + name + '.png');
+            // has to exist and be writable
+            try {
+                fs.mkdirSync(Util.storagePath('screens'));
+            } catch (ex) {
+                console.log('screens directory already exists!');
+            }
+
+            let dest = Util.storagePath('screens/' + name + '.png');
 
             try {
-                await Screenshot.run('rtmp://rtmp/live/' + name, dest);
+                await Screenshot.capture(Util.rtmpStreamUrl(name), dest);
             } catch (ex) {
                 console.log(ex);
             }

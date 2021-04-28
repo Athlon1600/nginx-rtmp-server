@@ -139,19 +139,14 @@
         return origin + '/' + path.replace(/^\/+/, '');
     }
 
-    function api_server_url(path) {
-        path = path.replace(/^\/+/, '');
-        return 'http://' + window.location.hostname + ':3000/' + path;
-    }
-
     function updateThumbnailForStream(name, cell) {
 
-        let url = api_server_url('/screens/' + name + '.png?ts=' + Date.now());
+        let url = rtmp_server_url('/screens/' + name + '.png?ts=' + Date.now());
 
         loadImage(url, function (url) {
 
             if (!url) {
-                url = api_server_url('/no_thumbnail.jpg');
+                url = 'https://i.ytimg.com/img/no_thumbnail.jpg';
             }
 
             let image = new Image();

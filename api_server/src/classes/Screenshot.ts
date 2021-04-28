@@ -2,7 +2,7 @@ const ffmpeg = require('fluent-ffmpeg');
 
 export class Screenshot {
 
-    static async run(inputStream: string, output: string): Promise<void> {
+    static async capture(inputStream: string, output: string): Promise<void> {
 
         return new Promise(function (resolve, reject) {
 

@@ -1,10 +1,11 @@
-# FROM jrottenberg/ffmpeg:4.1-alpine AS ff
-FROM node:14
+FROM jrottenberg/ffmpeg:4.1-alpine AS ff
 
-RUN apt-get update && apt-get install -y libav-tools ffmpeg
+FROM node:14-alpine
 
-# Create app directory
-# WORKDIR /usr/src/app
+RUN apk add --no-cache --update libgomp expat
+
+COPY --from=ff /usr/local /usr/local
+
 WORKDIR /app
 
 # Install app dependencies
