@@ -25,7 +25,7 @@ export class ScreenshotWorker {
             try {
                 fs.mkdirSync(Util.storagePath('screens'));
             } catch (ex) {
-                console.log('screens directory already exists!');
+                // do nothing
             }
 
             let dest = Util.storagePath('screens/' + name + '.png');
