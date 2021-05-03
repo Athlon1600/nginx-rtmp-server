@@ -1,6 +1,7 @@
 import {Util} from "../Util";
 import {FfmpegCommand} from "fluent-ffmpeg";
 import {ChildProcess} from "child_process";
+import {M3u8} from "./M3u8";
 
 const fs = require('fs');
 const ffmpeg = require('fluent-ffmpeg');
@@ -15,8 +16,15 @@ export class Transcoder {
         this.streamName = streamName;
     }
 
+    enableMobilePreset(boolean: boolean) {
+        this.enable480 = boolean;
+    }
+
     async start(): Promise<boolean> {
 
+        let playlistName = this.streamName;
+
+        // hls/{playlistName}/{variantName}/*.ts
         let srcPath = Util.storagePath('hls/' + this.streamName + '/src');
 
         // Writable directory must already exist or else ffmpeg fails
@@ -78,6 +86,9 @@ export class Transcoder {
                     .outputOptions(optionsFor480.concat(defaultOutputOptions))
             }
 
+            // TODO: this is a temporary solution... let ffmpeg itself generate this file
+            oThis.createMasterPlaylist();
+
             command
                 .on('start', function (commandLine: string) {
                     console.log(`[ffmpeg] ${commandLine}`);
@@ -103,6 +114,19 @@ export class Transcoder {
             this.command = command;
 
         });
+    }
+
+    protected createMasterPlaylist(): void {
+
+        let playlist = new M3u8();
+        playlist.addVariant('src/index.m3u8', 'src', 4500000);
+
+        if (this.enable480) {
+            playlist.addVariant('480p/index.m3u8', '480p', 550000);
+        }
+
+        let path = Util.storagePath('hls/' + this.streamName + '/master.m3u8');
+        fs.writeFileSync(path, playlist.toString());
     }
 
     public stop(): void {

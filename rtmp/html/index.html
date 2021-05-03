@@ -225,7 +225,7 @@
                 let btnPlay = button('Play using video.js');
                 btnPlay.onclick = function () {
 
-                    let url = getPlaylistUrl(name, 'src');
+                    let url = getPlaylistUrl(name);
                     play(url);
                 };
 
@@ -242,13 +242,8 @@
         });
     }
 
-    function getPlaylistUrl(name, variant) {
-
-        if (!variant) {
-            variant = 'src';
-        }
-
-        return rtmp_server_url('/hls/' + name + '/' + variant + '/index.m3u8');
+    function getPlaylistUrl(name) {
+        return rtmp_server_url('/hls/' + name + '/master.m3u8');
     }
 
     $(function () {
@@ -312,6 +307,7 @@
             alert(JSON.stringify(error));
         });
 
+        // TODO: https://github.com/kmoskwiak/videojs-resolution-switcher
         player.src({
             type: 'application/x-mpegURL',
             src: playlistUrl
