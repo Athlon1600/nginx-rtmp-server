@@ -2,6 +2,7 @@ import {OnPublishPayload} from "./classes/OnPublishPayload";
 import {OnPublishDonePayload} from "./classes/OnPublishDonePayload";
 import {ScreenshotWorker} from "./classes/ScreenshotWorker";
 import {Transcoder} from "./classes/Transcoder";
+import {Logger} from "./classes/Logger";
 
 // Keep a list of "open" streams
 const map = new Map<string, any>();
@@ -21,10 +22,10 @@ export class Hooks {
 
             transcoder.start()
                 .then(function () {
-                    console.log('Transcoder finished. Exited gracefully.')
+                    Logger.log('Transcoder finished. Exited gracefully.')
                 })
                 .catch(function (err) {
-                    console.log('Transcoder stopped with error: ' + err);
+                    Logger.error('Transcoder stopped with error: ' + err);
                 });
 
             let worker = new ScreenshotWorker(name);
@@ -34,6 +35,8 @@ export class Hooks {
 
             return true;
         }
+
+        Logger.log('Active stream already in process under this handle: ' + name);
 
         return false;
     }

@@ -1,5 +1,6 @@
 import {Application, Router} from "express";
 import {BaseController} from "../controllers/BaseController";
+import {Logger} from "./Logger";
 
 const express = require("express");
 
@@ -36,7 +37,7 @@ export class Server {
         this.app.use(this.router);
 
         this.app.listen(port, function () {
-            console.log(`Running on http://localhost:${port}`);
+            Logger.log(`Running on http://localhost:${port}`);
         });
     }
 }

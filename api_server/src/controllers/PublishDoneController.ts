@@ -2,6 +2,7 @@ import {BaseController} from "./BaseController";
 import {Request, Response, Router} from "express";
 import {OnPublishDonePayload} from "../classes/OnPublishDonePayload";
 import {Hooks} from "../hooks";
+import {Logger} from "../classes/Logger";
 
 export class PublishDoneController extends BaseController {
 
@@ -12,7 +13,7 @@ export class PublishDoneController extends BaseController {
 
             const payload = req.body as unknown as OnPublishDonePayload;
 
-            console.log('OnPublishDonePayload: ' + JSON.stringify(payload));
+            Logger.log('OnPublishDonePayload: ' + JSON.stringify(payload));
 
             try {
                 await Hooks.onPublishDone(payload);

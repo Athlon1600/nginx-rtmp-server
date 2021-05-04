@@ -2,6 +2,7 @@ import {Util} from "../Util";
 import {FfmpegCommand} from "fluent-ffmpeg";
 import {ChildProcess} from "child_process";
 import {M3u8} from "./M3u8";
+import {Logger} from "./Logger";
 
 const fs = require('fs');
 const ffmpeg = require('fluent-ffmpeg');
@@ -9,30 +10,38 @@ const ffmpeg = require('fluent-ffmpeg');
 export class Transcoder {
 
     protected streamName: string;
+    protected outputDirectoryName: string;
     protected enable480 = false;
     protected command: FfmpegCommand;
 
+    // inputUri
     constructor(streamName: string) {
         this.streamName = streamName;
+        this.outputDirectoryName = streamName;
     }
 
     enableMobilePreset(boolean: boolean) {
         this.enable480 = boolean;
     }
 
+    // helpful when translating from rtmp/live/{stream_key} => /hls/{custom_name}
+    setOutputDirectoryName(name: string) {
+        this.outputDirectoryName = name;
+    }
+
     async start(): Promise<boolean> {
 
-        let playlistName = this.streamName;
+        const dirName = this.outputDirectoryName;
 
         // hls/{playlistName}/{variantName}/*.ts
-        let srcPath = Util.storagePath('hls/' + this.streamName + '/src');
+        let srcPath = Util.storagePath('hls/' + dirName + '/src');
 
         // Writable directory must already exist or else ffmpeg fails
         fs.mkdirSync(srcPath, {
             recursive: true
         });
 
-        let mobilePath = Util.storagePath('hls/' + this.streamName + '/480p');
+        let mobilePath = Util.storagePath('hls/' + dirName + '/480p');
 
         fs.mkdirSync(mobilePath, {
             recursive: true
@@ -91,12 +100,12 @@ export class Transcoder {
 
             command
                 .on('start', function (commandLine: string) {
-                    console.log(`[ffmpeg] ${commandLine}`);
+                    Logger.log(`[ffmpeg] ${commandLine}`);
 
                     const process = command.ffmpegProc as ChildProcess;
                     const pid = process.pid;
 
-                    console.log(`[ffmpeg] PID: ${pid}`);
+                    Logger.log(`[ffmpeg] PID: ${pid}`);
 
                     process.on('exit', function () {
                         reject('Process was killed.');
@@ -125,7 +134,7 @@ export class Transcoder {
             playlist.addVariant('480p/index.m3u8', '480p', 550000);
         }
 
-        let path = Util.storagePath('hls/' + this.streamName + '/master.m3u8');
+        let path = Util.storagePath('hls/' + this.outputDirectoryName + '/master.m3u8');
         fs.writeFileSync(path, playlist.toString());
     }
 
@@ -135,7 +144,7 @@ export class Transcoder {
 
             // Sending a signal that terminates the process will result in the error event being emitted.
             this.command.on('error', function () {
-                console.log('Ffmpeg has been killed');
+                Logger.error('Ffmpeg has been killed');
             });
 
             this.command.kill('SIGKILL');

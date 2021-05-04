@@ -1,5 +1,6 @@
 import {Screenshot} from "./Screenshot";
 import {Util} from "../Util";
+import {Logger} from "./Logger";
 
 const fs = require('fs');
 
@@ -33,7 +34,7 @@ export class ScreenshotWorker {
             try {
                 await Screenshot.capture(Util.rtmpStreamUrl(name), dest);
             } catch (ex) {
-                console.log(ex);
+                Logger.error(ex);
             }
 
         }, ScreenshotWorker.EVERY_MS);
