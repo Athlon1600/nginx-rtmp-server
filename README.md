@@ -3,6 +3,9 @@
 See a demo of what this is here:  
 http://demo.streamplanet.tv/
 
+https + CDN version:  
+https://d2698f3nt8b6g9.cloudfront.net/
+
 ## Installation
 
 Download all the files first:
