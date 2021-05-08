@@ -47,15 +47,15 @@ export class Transcoder {
             recursive: true
         });
 
-        // never deletes old segments for some reason. Fix? -hls_wrap 5
         const defaultOutputOptions = [
             '-max_muxing_queue_size 9999',
             '-f hls',
-            '-hls_time 4',
-            '-hls_list_size 5',
+            '-hls_time 5',
+            '-hls_list_size 10',
             '-hls_flags delete_segments',
             '-hls_start_number_source epoch',
-            '-hls_playlist_type event',
+            // will not delete old segments...
+            // '-hls_playlist_type event',
         ];
 
         let optionsForSource = [
