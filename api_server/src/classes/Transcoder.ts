@@ -87,12 +87,12 @@ export class Transcoder {
 
             command
                 .output(srcPath + '/index.m3u8')
-                .outputOptions(optionsForSource.concat(defaultOutputOptions))
+                .outputOptions(optionsForSource);
 
             if (enable480) {
 
                 command.output(mobilePath + '/index.m3u8')
-                    .outputOptions(optionsFor480.concat(defaultOutputOptions))
+                    .outputOptions(optionsFor480);
             }
 
             // TODO: this is a temporary solution... let ffmpeg itself generate this file
