@@ -34,7 +34,7 @@ export class ScreenshotWorker {
             try {
                 await Screenshot.capture(Util.rtmpStreamUrl(name), dest);
             } catch (ex) {
-                Logger.error(ex);
+                Logger.error('Screenshot Worker error: ' + ex);
             }
 
         }, ScreenshotWorker.EVERY_MS);

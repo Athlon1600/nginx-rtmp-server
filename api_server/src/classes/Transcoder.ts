@@ -108,7 +108,7 @@ export class Transcoder {
                     Logger.log(`[ffmpeg] PID: ${pid}`);
 
                     process.on('exit', function () {
-                        reject('Process was killed.');
+                        reject('Transcoder: Process exited.');
                     });
                 })
                 .on('error', function (err: any, stdout: any, stderr: any) {
