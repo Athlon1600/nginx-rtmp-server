@@ -14,6 +14,8 @@ export class Transcoder {
     protected enable480 = false;
     protected command: FfmpegCommand;
 
+    protected playlistWatchInterval: NodeJS.Timer;
+
     // inputUri
     constructor(streamName: string) {
         this.streamName = streamName;
@@ -91,6 +93,8 @@ export class Transcoder {
 
             let command = ffmpeg();
 
+            let playlists = new Array<string>();
+
             command
                 .input(Util.rtmpStreamUrl(streamName))
                 .inputOption('-re');
@@ -99,15 +103,16 @@ export class Transcoder {
                 .output(srcPath + '/index.m3u8')
                 .outputOptions(optionsForSource);
 
+            playlists.push(srcPath + '/index.m3u8');
+
             if (enable480) {
 
                 command
                     .output(mobilePath + '/index.m3u8')
                     .outputOptions(optionsFor480);
-            }
 
-            // TODO: this is a temporary solution... let ffmpeg itself generate this file
-            oThis.createMasterPlaylist();
+                playlists.push(mobilePath + '/index.m3u8');
+            }
 
             command
                 .on('start', function (commandLine: string) {
@@ -121,6 +126,9 @@ export class Transcoder {
                     process.on('exit', function () {
                         reject('Transcoder: Process exited.');
                     });
+
+                    // do not create master playlist file until the playlists it is referencing exist first!
+                    oThis.createMasterPlaylistWhenExist(playlists);
                 })
                 .on('error', function (err: any, stdout: any, stderr: any) {
                     oThis.cleanup();
@@ -138,6 +146,23 @@ export class Transcoder {
         });
     }
 
+    protected createMasterPlaylistWhenExist(playlists: Array<string>): void {
+
+        this.playlistWatchInterval = setInterval(() => {
+
+            if (Util.existsSyncAll(playlists)) {
+                clearInterval(this.playlistWatchInterval);
+                this.createMasterPlaylist();
+
+                Logger.info('Master playlist was created!');
+            } else {
+                Logger.info('Master playlist not ready to be created...');
+            }
+
+        }, 1000);
+    }
+
+    // TODO: this is a temporary solution... let ffmpeg itself generate this file
     protected createMasterPlaylist(): void {
 
         let playlist = new M3u8();
@@ -152,6 +177,8 @@ export class Transcoder {
     }
 
     protected cleanup(): void {
+        clearInterval(this.playlistWatchInterval);
+
         let userDir = Util.storagePath('hls/' + this.outputDirectoryName);
 
         Logger.info('Cleaning up playlist files for a stream that is now offline...');

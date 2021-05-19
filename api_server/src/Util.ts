@@ -1,4 +1,5 @@
 const config = require('./config').default;
+const fs = require('fs');
 
 export class Util {
 
@@ -20,5 +21,14 @@ export class Util {
 
     public static rtmpStreamUrl(name: string) {
         return 'rtmp://' + config.rtmp.host.trim() + '/live/' + this.trimSlashStart(name);
+    }
+
+    public static existsSyncAll(paths: Array<string>) {
+
+        let existing = paths.filter(function (path) {
+            return fs.existsSync(path);
+        });
+
+        return existing.length === paths.length;
     }
 }
