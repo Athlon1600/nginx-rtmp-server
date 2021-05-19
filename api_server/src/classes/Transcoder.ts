@@ -29,6 +29,16 @@ export class Transcoder {
         this.outputDirectoryName = name;
     }
 
+    // TODO:
+    getPlaylistStoragePath(variant?: string) {
+
+        if (variant) {
+            Util.storagePath('hls/' + this.outputDirectoryName + '/' + variant);
+        }
+
+        return Util.storagePath('hls/' + this.outputDirectoryName);
+    }
+
     async start(): Promise<boolean> {
 
         const dirName = this.outputDirectoryName;
@@ -91,7 +101,8 @@ export class Transcoder {
 
             if (enable480) {
 
-                command.output(mobilePath + '/index.m3u8')
+                command
+                    .output(mobilePath + '/index.m3u8')
                     .outputOptions(optionsFor480);
             }
 
@@ -112,9 +123,11 @@ export class Transcoder {
                     });
                 })
                 .on('error', function (err: any, stdout: any, stderr: any) {
+                    oThis.cleanup();
                     reject(err);
                 })
                 .on('end', function (stdout: any, stderr: any) {
+                    oThis.cleanup();
                     resolve(true);
                 });
 
@@ -136,6 +149,17 @@ export class Transcoder {
 
         let path = Util.storagePath('hls/' + this.outputDirectoryName + '/master.m3u8');
         fs.writeFileSync(path, playlist.toString());
+    }
+
+    protected cleanup(): void {
+        let userDir = Util.storagePath('hls/' + this.outputDirectoryName);
+
+        Logger.info('Cleaning up playlist files for a stream that is now offline...');
+        Logger.info('Dir: ' + userDir);
+
+        fs.rmdirSync(userDir, {
+            recursive: true
+        });
     }
 
     public stop(): void {
