@@ -1,3 +1,5 @@
+![](https://img.shields.io/github/last-commit/Athlon1600/nginx-rtmp-server.svg) 
+
 # Video Streaming Server
 
 See a demo of what this is here:  
