@@ -3,9 +3,6 @@
 See a demo of what this is here:  
 http://demo.streamplanet.tv/
 
-https + CDN version:  
-https://d2698f3nt8b6g9.cloudfront.net/
-
 ## Installation
 
 Download all the files first:
@@ -14,7 +11,7 @@ Download all the files first:
 git clone https://github.com/Athlon1600/nginx-rtmp-server.git
 ```
 
-Next, you need docker. 
+Next, you need docker.
 
 **Windows**  
 If you are testing this from your local windows computer, download Docker from here:
@@ -28,6 +25,7 @@ bash <(wget -O - https://raw.githubusercontent.com/Athlon1600/nginx-rtmp-server/
 ```
 
 Once installed, run this command inside the folder with the files:
+
 ```shell
 docker-compose up --build -d
 ```
@@ -44,6 +42,10 @@ https://github.com/arut/nginx-rtmp-module
 
 We will be using this fork instead:  
 https://github.com/sergey-dryabzhinsky/nginx-rtmp-module
+
+## Projects using this library
+
+- https://watchseinfeld.net
 
 ## Links
 
