@@ -19,8 +19,6 @@ export class M3u8 {
 
         this.variants.forEach(function (val) {
 
-            str += '#EXT-X-MEDIA:NAME="' + val[1] + '"';
-            str += os.EOL;
             str += '#EXT-X-STREAM-INF:BANDWIDTH=' + val[2];
             str += os.EOL;
             str += val[0];
