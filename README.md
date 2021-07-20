@@ -34,6 +34,12 @@ docker-compose up --build -d
 
 and that is it!
 
+You could then login to any of the two "services" using:  
+```shell
+docker exec -it rtmp /bin/bash
+docker exec -it api_server /bin/sh
+```
+
 ## Technical Notes
 
 Powered by RTMP module for nginx.  
