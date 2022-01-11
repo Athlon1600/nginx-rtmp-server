@@ -40,6 +40,13 @@ docker exec -it rtmp /bin/bash
 docker exec -it api_server /bin/sh
 ```
 
+## Monitoring
+
+```shell
+docker logs rtmp --tail 100
+docker logs api_server --tail 100
+```
+
 ## Technical Notes
 
 Powered by RTMP module for nginx.  
