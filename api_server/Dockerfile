@@ -4,7 +4,8 @@ FROM node:14-alpine
 
 RUN apk add --no-cache --update libgomp expat
 
-COPY --from=ff /usr/local /usr/local
+## https://github.com/jrottenberg/ffmpeg/issues/99#issuecomment-396659630
+COPY --from=ff / /
 
 WORKDIR /app
 

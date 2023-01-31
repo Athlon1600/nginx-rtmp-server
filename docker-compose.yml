@@ -4,8 +4,8 @@ services:
     container_name: 'rtmp'
     build: './rtmp'
     ports:
-      - '1935:1935'
-      - '80:80'
+      - "1935:1935"
+      - "${NGINX_PORT:-80}:80"
     volumes:
       - ./rtmp/html:/usr/local/nginx/html
       - storage:/var/storage
@@ -13,14 +13,14 @@ services:
     container_name: 'api_server'
     build: './api_server'
     ports:
-      - '3000:3000'
+      - "${API_PORT:-127.0.0.1:3000}:3000"
     volumes:
+      - ./api_server:/app
+      - /app/node_modules
       - storage:/var/storage
-    #      - ./express:/app
-    #      - /app/node_modules
     environment:
       - NODE_ENV=production
       - STORAGE=/var/storage/
       - RTMP_SERVER=rtmp
 volumes:
-  storage:
+  storage: { }

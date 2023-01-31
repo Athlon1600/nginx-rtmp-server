@@ -1,4 +1,5 @@
-![](https://img.shields.io/github/last-commit/Athlon1600/nginx-rtmp-server.svg) 
+![GitHub last commit](https://img.shields.io/github/last-commit/athlon1600/nginx-rtmp-server)
+![Top language](https://img.shields.io/github/languages/top/athlon1600/nginx-rtmp-server)
 
 # Video Streaming Server
 
@@ -45,6 +46,14 @@ docker exec -it api_server /bin/sh
 ```shell
 docker logs rtmp --tail 100
 docker logs api_server --tail 100
+```
+
+## Caddy
+
+Useful for providing automatic HTTPS:
+
+```shell
+curl -sS https://webi.sh/caddy | sh
 ```
 
 ## Technical Notes

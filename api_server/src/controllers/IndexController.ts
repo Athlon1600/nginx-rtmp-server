@@ -10,7 +10,7 @@ export class IndexController extends BaseController {
         });
 
         router.get('/', function (req: Request, res: Response) {
-            res.send('This entire server ideally would not be accessible from the outside.');
+            res.send('Hello world from nginx-rtmp-server - API Server');
         });
     }
 }
