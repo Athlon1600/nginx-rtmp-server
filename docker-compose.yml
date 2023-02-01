@@ -15,8 +15,6 @@ services:
     ports:
       - "${API_PORT:-127.0.0.1:3000}:3000"
     volumes:
-      - ./api_server:/app
-      - /app/node_modules
       - storage:/var/storage
     environment:
       - NODE_ENV=production

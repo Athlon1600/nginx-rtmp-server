@@ -50,10 +50,16 @@ docker logs api_server --tail 100
 
 ## Caddy
 
-Useful for providing automatic HTTPS:
+Useful for providing automatic HTTPS - one-click installation:
 
 ```shell
 curl -sS https://webi.sh/caddy | sh
+```
+
+Modify `.env` and `etc/Caddyfile` accordingly, and then run:
+
+```shell
+caddy run --config ./etc/Caddyfile
 ```
 
 ## Technical Notes
