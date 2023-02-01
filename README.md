@@ -3,8 +3,7 @@
 
 # Video Streaming Server
 
-See a demo of what this is here:  
-https://secure.streamplanet.tv/
+See a demo of what this is here - https://demo.streamplanet.tv/
 
 ## Installation
 
