@@ -3,7 +3,9 @@
 
 # Video Streaming Server
 
-See a demo of what this is here - https://demo.streamplanet.tv/
+Self-host your own **Amazon IVS** like service for cheap.
+
+See a demo here - https://demo.streamplanet.tv/
 
 ## Installation
 
