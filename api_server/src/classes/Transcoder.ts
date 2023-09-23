@@ -116,7 +116,7 @@ export class Transcoder {
 
             command
                 .on('start', function (commandLine: string) {
-                    Logger.log(`[ffmpeg] ${commandLine}`);
+                    Logger.log(`[ffmpeg] Command ${commandLine}`);
 
                     const process = command.ffmpegProc as ChildProcess;
                     const pid = process.pid;
@@ -159,7 +159,7 @@ export class Transcoder {
                 Logger.info('Master playlist not ready to be created...');
             }
 
-        }, 1000);
+        }, 3000);
     }
 
     // TODO: this is a temporary solution... let ffmpeg itself generate this file
