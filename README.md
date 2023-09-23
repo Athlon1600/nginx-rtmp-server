@@ -34,34 +34,10 @@ Once installed, run this command inside the folder with the files:
 docker-compose up --build -d
 ```
 
-and that is it!
+and that is it! This will launch to services:
 
-You could then login to any of the two "services" using:  
-```shell
-docker exec -it rtmp /bin/bash
-docker exec -it api_server /bin/sh
-```
-
-## Monitoring
-
-```shell
-docker logs rtmp --tail 100
-docker logs api_server --tail 100
-```
-
-## Caddy
-
-Useful for providing automatic HTTPS - one-click installation:
-
-```shell
-curl -sS https://webi.sh/caddy | sh
-```
-
-Modify `.env` and `etc/Caddyfile` accordingly, and then run:
-
-```shell
-caddy run --config ./etc/Caddyfile
-```
+- HTTP Nginx Server on `http://localhost:8090`
+- RTMP Ingest Server on `rtmp://localhost:1935`
 
 ## Technical Notes
 
