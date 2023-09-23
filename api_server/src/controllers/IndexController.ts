@@ -10,7 +10,9 @@ export class IndexController extends BaseController {
         });
 
         router.get('/', function (req: Request, res: Response) {
-            res.send('Hello world from nginx-rtmp-server - API Server');
+            res.json({
+                message: 'Hello world from nginx-rtmp-server - API Server'
+            });
         });
     }
 }
