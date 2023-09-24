@@ -1,5 +1,7 @@
-const config = require('./config').default;
+import {CONFIG} from "./config";
+
 const fs = require('fs');
+const crypto = require("crypto");
 
 export class Util {
 
@@ -16,11 +18,11 @@ export class Util {
     }
 
     public static storagePath(path: string) {
-        return this.trimSlashEnd(config.storage) + '/' + this.trimSlashStart(path);
+        return this.trimSlashEnd(CONFIG.storage) + '/' + this.trimSlashStart(path);
     }
 
     public static rtmpStreamUrl(name: string) {
-        return 'rtmp://' + config.rtmp.host.trim() + '/live/' + this.trimSlashStart(name);
+        return 'rtmp://' + CONFIG.rtmp.host.trim() + '/live/' + this.trimSlashStart(name);
     }
 
     public static existsSyncAll(paths: Array<string>) {
@@ -30,5 +32,37 @@ export class Util {
         });
 
         return existing.length === paths.length;
+    }
+
+    // inclusive, exclusive
+    public static randomInteger(min: number, max: number): number {
+        return Math.floor(
+            Math.random() * (max - min) + min
+        )
+    }
+
+    public static randomString(length: number = 16): string {
+        let str = crypto.randomBytes(length * 2).toString('base64');
+
+        str = str.replace(/[^a-z0-9]/ig, "");
+        str = str.substring(0, length);
+
+        return str;
+    }
+
+    // EXACTLY 32 characters long
+    public static generateStreamKey(): string {
+        return 'sk_' + this.randomString(29);
+    }
+
+    // must be 4-100 characters long. Letters and numbers only. Cannot start with a number
+    public static validateChannelName(name: string): boolean {
+
+        if (typeof name !== 'string') {
+            return false;
+        }
+
+        const pattern = /^[a-z][a-z0-9]{3,99}$/;
+        return pattern.test(name);
     }
 }

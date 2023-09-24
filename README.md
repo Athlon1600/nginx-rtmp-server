@@ -28,9 +28,10 @@ On your linux machine, just run this command on your fresh box
 bash <(wget -O - https://raw.githubusercontent.com/Athlon1600/nginx-rtmp-server/master/install.sh)
 ```
 
-Once installed, run this command inside the folder with the files:
+Once installed, run either:
 
 ```shell
+docker-compose up --build --abort-on-container-exit
 docker-compose up --build -d
 ```
 
