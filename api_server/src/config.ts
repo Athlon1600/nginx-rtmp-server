@@ -12,7 +12,7 @@ const urlFromEnv: URL | null = (() => {
 })();
 
 const connectionOptions: ConnectionOptions = {
-    host: urlFromEnv?.hostname || 'localhost',
+    host: urlFromEnv?.hostname || 'db',
     port: +(urlFromEnv?.port || 3306),
     user: urlFromEnv?.username || 'root',
     password: urlFromEnv?.password || 'password',

@@ -3,6 +3,9 @@ import {Request, Response, Router} from "express";
 import {OnPublishPayload} from "../classes/OnPublishPayload";
 import {Hooks} from "../hooks";
 import {Logger} from "../classes/Logger";
+import {Util} from "../Util";
+import {StreamInfo} from "../classes/StreamInfo";
+import {Database} from "../Database";
 
 export class PublishController extends BaseController {
 
@@ -22,10 +25,24 @@ export class PublishController extends BaseController {
                 let result = await Hooks.onPublish(params);
 
                 if (result) {
-                    return res.status(201).send('OK');
+                    res.status(201).send('OK');
+
+                    res.on('finish', () => {
+
+                        StreamInfo.probeAsync(Util.rtmpStreamUrl(params.name))
+                            .then((streamInfo) => {
+
+                                Database.getInstance().createNewStream(params.name, params.addr, JSON.stringify(streamInfo));
+
+                            });
+
+                    });
+
+                    return;
                 }
 
             } catch (ex) {
+                console.error(ex);
                 // report!
             }
 

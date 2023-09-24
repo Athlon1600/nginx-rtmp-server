@@ -1,5 +1,6 @@
 import {BaseController} from "./BaseController";
 import {Request, Response, Router} from "express";
+import {Database} from "../Database";
 
 export class IndexController extends BaseController {
 
@@ -14,5 +15,24 @@ export class IndexController extends BaseController {
                 message: 'Hello world from nginx-rtmp-server - API Server'
             });
         });
+
+        router.get('/health', async (req, res) => {
+
+            try {
+
+                await Database.getInstance().ping();
+
+                res.json({
+                    status: 'OK'
+                });
+
+            } catch (e) {
+
+                res.json({
+                    error: e
+                });
+            }
+
+        })
     }
 }

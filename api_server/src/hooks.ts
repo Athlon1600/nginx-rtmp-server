@@ -19,6 +19,7 @@ export class Hooks {
             map.set(name, 1);
 
             const transcoder = new Transcoder(name);
+            const worker = new ScreenshotWorker(name);
 
             transcoder.start()
                 .then(function () {
@@ -26,9 +27,11 @@ export class Hooks {
                 })
                 .catch(function (err) {
                     Logger.error('Transcoder stopped with error: ' + err);
+                })
+                .finally(() => {
+                    worker.stop();
                 });
 
-            let worker = new ScreenshotWorker(name);
             worker.start();
 
             screenWorkers.set(name, worker);

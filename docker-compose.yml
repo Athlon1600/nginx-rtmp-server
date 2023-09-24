@@ -1,6 +1,19 @@
 version: "3.9"
 services:
 
+  database:
+    container_name: db
+    image: mysql
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-password}
+    volumes:
+      - ./docker/mysql/data:/var/lib/mysql
+      - ./docker/mysql/init:/docker-entrypoint-initdb.d
+    ports:
+      - "${MYSQL_PORT_EXPOSE:-127.0.0.1:3306}:3306"
+
   rtmp:
     container_name: 'rtmp'
     build: './rtmp'
@@ -20,7 +33,17 @@ services:
       - ./public/storage:/var/storage
     environment:
       - NODE_ENV=production
+     # - MYSQL_CONNECTION=mysql://root:password@db:3306
       - RTMP_SERVER=rtmp
+
+  adminer:
+    image: adminer
+    restart: always
+    environment:
+      - ADMINER_DEFAULT_SERVER=db
+      - ADMINER_DESIGN='nette'
+    ports:
+      - "127.0.0.1:9000:8080"
 
 volumes:
   storage: { }

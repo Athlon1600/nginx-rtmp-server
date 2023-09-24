@@ -3,6 +3,7 @@ import {Request, Response, Router} from "express";
 import {OnPublishDonePayload} from "../classes/OnPublishDonePayload";
 import {Hooks} from "../hooks";
 import {Logger} from "../classes/Logger";
+import {Database} from "../Database";
 
 export class PublishDoneController extends BaseController {
 
@@ -20,6 +21,10 @@ export class PublishDoneController extends BaseController {
             } catch (ex) {
 
             }
+
+            res.on('finish', () => {
+                Database.getInstance().updateStreamInfo(payload.name, payload.bytes_in);
+            })
 
             res.status(200).send('OK');
         });
