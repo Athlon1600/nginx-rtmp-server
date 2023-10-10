@@ -1,6 +1,6 @@
-import {Application, Router} from "express";
-import {BaseController} from "../controllers/BaseController";
+import {Application, Router, Request, Response} from "express";
 import {Logger} from "./Logger";
+import {routes} from "../routes";
 
 const express = require("express");
 
@@ -28,13 +28,19 @@ export class Server {
         this.app = app;
     }
 
-    public registerController(controller: BaseController) {
-        controller.init(this.router);
-    }
-
     public start(port: any) {
 
         this.app.use(this.router);
+        this.app.use("/", routes);
+
+        // must be registered AFTER all routes
+        this.app.use((error: Error, req: Request, res: Response, next: any) => {
+
+            res.status(500).json({
+                error: error.message ?? error,
+                // stack: error.stack ?? null
+            });
+        });
 
         this.app.listen(port, function () {
             Logger.log(`Running on http://localhost:${port}`);
