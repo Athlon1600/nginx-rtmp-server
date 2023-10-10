@@ -32,7 +32,8 @@ RUN tar -xvz -f "dev.tar.gz" && \
     make install
 
 COPY nginx.conf /usr/local/nginx/conf
-COPY /html /usr/local/nginx/html
+
+RUN apt-get install -y procps
 
 EXPOSE 80
 EXPOSE 1935
