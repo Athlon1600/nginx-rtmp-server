@@ -42,8 +42,7 @@ router.post('/on_publish', async function (req: Request, res: Response) {
         }
 
     } catch (ex) {
-        console.error(ex);
-        // report!
+        Logger.error(ex);
     }
 
     res.status(400).send('Unauthorized');
