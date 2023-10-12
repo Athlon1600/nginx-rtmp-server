@@ -41,11 +41,11 @@ export class Util {
         )
     }
 
-    public static randomString(length: number = 16): string {
+    public static randomString(length: number = 16, customPrefix: string = ""): string {
         let str = crypto.randomBytes(length * 2).toString('base64');
 
         str = str.replace(/[^a-z0-9]/ig, "");
-        str = str.substring(0, length);
+        str = customPrefix + str.substring(0, length - customPrefix.length);
 
         return str;
     }
@@ -61,6 +61,8 @@ export class Util {
         if (typeof name !== 'string') {
             return false;
         }
+        
+        // TODO: exclude banned words
 
         const pattern = /^[a-z][a-z0-9]{3,99}$/;
         return pattern.test(name);
