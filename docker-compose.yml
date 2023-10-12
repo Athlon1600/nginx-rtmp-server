@@ -33,7 +33,8 @@ services:
       - ./public/storage:/var/storage
     environment:
       - NODE_ENV=production
-     # - MYSQL_CONNECTION=mysql://root:password@db:3306
+      - DB_HOST=db
+      # - MYSQL_CONNECTION=mysql://root:password@db:3306
       - RTMP_SERVER=rtmp
 
   adminer:

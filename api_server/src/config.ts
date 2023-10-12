@@ -1,6 +1,8 @@
 import {ConnectionOptions} from "mysql2";
 import {URL} from "url";
 
+require('dotenv').config();
+
 const urlFromEnv: URL | null = (() => {
 
     try {
@@ -12,7 +14,7 @@ const urlFromEnv: URL | null = (() => {
 })();
 
 const connectionOptions: ConnectionOptions = {
-    host: urlFromEnv?.hostname || 'db',
+    host: process.env.DB_HOST || urlFromEnv?.hostname || 'localhost',
     port: +(urlFromEnv?.port || 3306),
     user: urlFromEnv?.username || 'root',
     password: urlFromEnv?.password || 'password',

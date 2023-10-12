@@ -1,6 +1,7 @@
-import {Pool, ResultSetHeader, RowDataPacket} from "mysql2";
+import {FieldPacket, Pool, ResultSetHeader, RowDataPacket} from "mysql2";
 import {Util} from "./Util";
 import {CONFIG} from "./config";
+import {IChannel} from "./types";
 
 const mysql = require('mysql2');
 
@@ -44,8 +45,12 @@ export class Database {
     }
 
     // contains affectedRows and lastInsertId properties.
-    public async update() {
-        // TODO
+    public async insertGetId(sql: string, parameters?: unknown[]): Promise<number> {
+
+        const [result, fields]: [ResultSetHeader, FieldPacket[]] = await this.pool.promise()
+            .query<ResultSetHeader>(sql, parameters);
+
+        return result.insertId;
     }
 
     async ping(): Promise<boolean> {
@@ -61,20 +66,36 @@ export class Database {
         return rows.length && rows[0]["cnt"] == 0;
     }
 
-    async createChannel(name: string): Promise<boolean> {
+    async createChannel(name: string, ipAddress: string): Promise<boolean> {
 
         if (!await this.checkIfChannelNameAvailable(name)) {
             throw "Channel with name '" + name + "' is not available";
         }
 
-        const sk = Util.generateStreamKey();
+        const streamKey: string = Util.generateStreamKey();
+        const authKey: string = Util.randomString(32, 'ak_');
 
-        const result = await this.pool.promise()
-            .execute<ResultSetHeader>("INSERT INTO channels (created_at, name, stream_key) VALUES (UTC_TIMESTAMP(), ?, ?)", [
-                name, sk
-            ]);
+        const result = await this.insertGetId(
+            "INSERT INTO channels (created_at, ip_address, name, auth_key, stream_key) VALUES (UTC_TIMESTAMP(), ?, ?, ?, ?)",
+            [ipAddress, name, authKey, streamKey]
+        );
 
         return true;
+    }
+
+    async findChannelById(id: number): Promise<IChannel> {
+        const result: IChannel[] = await this.select<IChannel>("SELECT * FROM channels WHERE id = ?", [id]);
+        return result.length ? result[0] : null;
+    }
+
+    async findChannelByAuthToken(token: string): Promise<IChannel | null> {
+        const result = await this.select<IChannel>("SELECT * FROM channels WHERE stream_key = ? LIMIT 1", [token]);
+        return result.length ? result[0] : null;
+    }
+
+    async findChannelByName(name: string): Promise<IChannel> {
+        const result: IChannel[] = await this.select<IChannel>("SELECT * FROM channels WHERE name = ? LIMIT 1", [name]);
+        return result.length ? result[0] : null;
     }
 
     async createNewStream(name: string, ipAddress: string, streamInfo: string): Promise<void> {

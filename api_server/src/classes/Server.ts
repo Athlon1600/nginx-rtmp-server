@@ -33,6 +33,15 @@ export class Server {
         this.app.use(this.router);
         this.app.use("/", routes);
 
+        this.app.use((req: Request, res: Response, next) => {
+
+            const path = req.path;
+
+            res.status(404).json({
+                error: `${path} not found`
+            });
+        });
+
         // must be registered AFTER all routes
         this.app.use((error: Error, req: Request, res: Response, next: any) => {
 
