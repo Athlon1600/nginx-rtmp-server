@@ -66,21 +66,21 @@ export class Database {
         return rows.length && rows[0]["cnt"] == 0;
     }
 
-    async createChannel(name: string, ipAddress: string): Promise<boolean> {
+    async createChannel(name: string, ipAddress: string): Promise<IChannel> {
 
         if (!await this.checkIfChannelNameAvailable(name)) {
             throw "Channel with name '" + name + "' is not available";
         }
 
-        const streamKey: string = Util.generateStreamKey();
         const authKey: string = Util.randomString(32, 'ak_');
+        const streamKey: string = Util.generateStreamKey();
 
-        const result = await this.insertGetId(
+        const result: number = await this.insertGetId(
             "INSERT INTO channels (created_at, ip_address, name, auth_key, stream_key) VALUES (UTC_TIMESTAMP(), ?, ?, ?, ?)",
             [ipAddress, name, authKey, streamKey]
         );
 
-        return true;
+        return this.findChannelById(result);
     }
 
     async findChannelById(id: number): Promise<IChannel> {

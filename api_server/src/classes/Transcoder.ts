@@ -62,7 +62,7 @@ export class Transcoder {
         const defaultOutputOptions = [
             '-max_muxing_queue_size 9999',
             '-f hls',
-            '-hls_time 5',
+            '-hls_time 5', // higher causes more delay
             '-hls_list_size 10',
             '-hls_flags delete_segments',
             '-hls_start_number_source epoch',
