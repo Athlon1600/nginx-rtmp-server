@@ -1,4 +1,4 @@
-FROM debian:buster-slim
+FROM debian:bullseye-slim
 
 RUN apt-get update
 
@@ -12,12 +12,12 @@ RUN apt-get install -y ffmpeg
 RUN apt-get install -y curl vim glances
 
 ## Install nginx
-RUN curl -OL https://nginx.org/download/nginx-1.18.0.tar.gz
-RUN tar -zxf nginx-1.18.0.tar.gz
+RUN curl -OL https://nginx.org/download/nginx-1.20.2.tar.gz
+RUN tar -zxf nginx-1.20.2.tar.gz
 
 RUN curl -OL "https://github.com/sergey-dryabzhinsky/nginx-rtmp-module/archive/dev.tar.gz"
 RUN tar -xvz -f "dev.tar.gz" && \
-    cd nginx-1.18.0 && \
+    cd nginx-1.20.2 && \
     ./configure \
         --prefix=/usr/local/nginx \
         --conf-path=/usr/local/nginx/conf/nginx.conf \
