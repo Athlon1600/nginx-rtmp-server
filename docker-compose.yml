@@ -3,7 +3,7 @@ services:
 
   database:
     container_name: db
-    image: mysql
+    image: mysql:8.0.34
     command: --default-authentication-plugin=mysql_native_password
     restart: always
     environment:
@@ -31,6 +31,7 @@ services:
       - "${API_PORT:-127.0.0.1:3000}:3000"
     volumes:
       - ./public/storage:/var/storage
+      # - ./api_server/src:/app/src
     environment:
       - NODE_ENV=production
       - DB_HOST=db
