@@ -9,16 +9,16 @@ See a demo here - https://demo.streamplanet.tv/
 
 ## Installation
 
-Download all the files first:
+Clone this repository:
 
 ```shell
 git clone https://github.com/Athlon1600/nginx-rtmp-server.git
 ```
 
-Next, you need docker.
+Next, you need Docker.
 
 **Windows**  
-If you are testing this from your local windows computer, download Docker from here:
+If you are testing this from your local Windows computer, download Docker from here:
 https://docs.docker.com/docker-for-windows/install/
 
 **Linux**  

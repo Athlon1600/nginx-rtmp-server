@@ -1,4 +1,8 @@
-FROM debian:bullseye-slim
+FROM debian:bookworm-slim
+
+## rtmp-module was last updated May 15, 2022
+## Nginx version is from 19 Oct 2022
+ENV NGINX_VERSION=1.22.1
 
 RUN apt-get update
 
@@ -12,12 +16,12 @@ RUN apt-get install -y ffmpeg
 RUN apt-get install -y curl vim glances
 
 ## Install nginx
-RUN curl -OL https://nginx.org/download/nginx-1.20.2.tar.gz
-RUN tar -zxf nginx-1.20.2.tar.gz
+RUN curl -OL https://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz
+RUN tar -zxf nginx-${NGINX_VERSION}.tar.gz
 
 RUN curl -OL "https://github.com/sergey-dryabzhinsky/nginx-rtmp-module/archive/dev.tar.gz"
 RUN tar -xvz -f "dev.tar.gz" && \
-    cd nginx-1.20.2 && \
+    cd nginx-${NGINX_VERSION} && \
     ./configure \
         --prefix=/usr/local/nginx \
         --conf-path=/usr/local/nginx/conf/nginx.conf \
