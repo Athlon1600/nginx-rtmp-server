@@ -72,6 +72,11 @@ Your stream is now ready to be consumed via HTTP as `.m3u8` playlist by any supp
 http://localhost:8090/hls/test/master.m3u8
 ```
 
+|  |                                                                  |
+|---------|------------------------------------------------------------------|
+| ![VLC Media Player Open Network Stream](https://i.imgur.com/gSBSZqO.png) | ![VLC Media Player Network URL](https://i.imgur.com/j6P9AGv.png) |
+
+
 or you can embed that video stream on your website by using `hls.js` Javascript library:
 - https://hlsjs.video-dev.org
 
@@ -83,7 +88,7 @@ https://www.nginx.com/products/nginx/modules/rtmp-media-streaming/
 The original codebase stopped receiving updates years ago:  
 https://github.com/arut/nginx-rtmp-module
 
-We will be using this fork instead:  
+so we will be using this fork instead:  
 https://github.com/sergey-dryabzhinsky/nginx-rtmp-module
 
 ## Projects using this library
