@@ -3,7 +3,7 @@
 
 # Video Streaming Server
 
-Self-host your own **Amazon IVS** like service for cheap.
+Self-host your own streaming server without relying on any external and expensive services (like **Amazon IVS**).
 
 See a demo here - https://demo.streamplanet.tv/
 
@@ -22,23 +22,58 @@ If you are testing this from your local Windows computer, download Docker from h
 https://docs.docker.com/docker-for-windows/install/
 
 **Linux**  
-On your linux machine, just run this command on your fresh box
+Install Docker with just this one command:
 
 ```shell
 bash <(wget -O - https://raw.githubusercontent.com/Athlon1600/nginx-rtmp-server/master/install.sh)
 ```
 
-Once installed, run either:
+Once Docker is installed, run:
 
 ```shell
-docker-compose up --build --abort-on-container-exit
 docker-compose up --build -d
 ```
 
-and that is it! This will launch to services:
+and that is it! This will launch two services:
 
-- HTTP Nginx Server on `http://localhost:8090`
+- HTTP Nginx Server on http://localhost:8090
 - RTMP Ingest Server on `rtmp://localhost:1935`
+
+## Usage
+
+Once the two services are up and running, you can now start streaming to your newly launched RTMP server at this endpoint:
+
+```shell
+rtmp://localhost:1935/live/{stream_key}
+```
+
+`{stream_key}` can be anything you want. In all the examples below we just use `test`.
+
+If you are using OBS, point your streaming settings to:
+
+```shell
+rtmp://localhost:1935/live/test
+```
+
+![OBS Stream Settings](https://i.imgur.com/iH5Zp2Q.png)
+
+
+otherwise, you can just stream any mp4-like video file using `ffmpeg`:
+
+```shell
+ffmpeg -stream_loop -1 -nostdin -re -i "video.mp4" -copy -f flv rtmp://localhost/live/test
+```
+
+Your stream is now ready to be consumed via HTTP as `.m3u8` playlist by any supporting client such as VLC Media Player:
+- `Media -> Open Network Stream -> Network`
+- Paste the link there:
+
+```shell
+http://localhost:8090/hls/test/master.m3u8
+```
+
+or you can embed that video stream on your website by using `hls.js` Javascript library:
+- https://hlsjs.video-dev.org
 
 ## Technical Notes
 
