@@ -97,6 +97,5 @@ https://github.com/sergey-dryabzhinsky/nginx-rtmp-module
 
 ## Links
 
-- https://www.nginx.com/products/nginx/modules/rtmp-media-streaming/
 - https://github.com/arut/nginx-rtmp-module/wiki/Directives
 - https://developer.apple.com/library/archive/documentation/NetworkingInternet/Conceptual/StreamingMediaGuide/Introduction/Introduction.html
