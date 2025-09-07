@@ -34,7 +34,9 @@ services:
       # - ./api_server/src:/app/src
     environment:
       - NODE_ENV=production
+      # - NODE_OPTIONS=--trace-uncaught --trace-warnings --unhandled-rejections=strict
       - DB_HOST=db
+      - TSC_WATCHFILE=DynamicPriorityPolling # make watch work inside linux docker
       # - MYSQL_CONNECTION=mysql://root:password@db:3306
       - RTMP_SERVER=rtmp
 
