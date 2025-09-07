@@ -8,7 +8,7 @@
     <title>Nginx RTMP Media Server</title>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.0/css/bootstrap.min.css"/>
-    <link href="https://vjs.zencdn.net/7.11.4/video-js.css" rel="stylesheet"/>
+    <link href="https://vjs.zencdn.net/8.23.3/video-js.css" rel="stylesheet"/>
 
     <style>
     </style>
@@ -49,16 +49,13 @@
     <table id="tbl_stats" class="table table-bordered table-striped">
         <thead class="thead-light">
         <tr>
-            <th>Name</Th>
+            <th>Stream Key</Th>
             <th>Time</th>
-            <th>In bytes</th>
+            <th>In Total</th>
             <th>In Mb/s</th>
-            <th>Video codec</th>
-            <th>fps</th>
-            <th>Audio codec</th>
-            <th>Frequency</th>
-            <th>Channels</th>
-            <th>-</th>
+            <th>Out Total</th>
+            <th>Out Mb/s</th>
+            <th>Screenshot</th>
             <th>Stream Url</th>
             <th>Actions</th>
         </tr>
@@ -91,7 +88,7 @@
 </div>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-<script src="https://vjs.zencdn.net/7.11.4/video.min.js"></script>
+<script src="https://vjs.zencdn.net/8.23.3/video.min.js"></script>
 
 <script>
 
@@ -102,7 +99,7 @@
         return btn;
     }
 
-    function sizeFormatted(bytes) {
+    function formatBytes(bytes) {
 
         let bytesInGb = Math.pow(1024, 3);
         let bytesInMb = Math.pow(1000, 2);
@@ -114,6 +111,10 @@
         }
 
         return bytes + ' bytes';
+    }
+
+    function formatBitsPerSecond(bitsPerSecond) {
+        return (bitsPerSecond / Math.pow(10, 6)).toFixed(2) + " Mb/s";
     }
 
     function secondsFormatted(seconds) {
@@ -154,7 +155,7 @@
             image.width = 80;
             image.height = 60;
 
-            cell.innerHTML = image.outerHTML;
+            cell.innerHTML = `<a href="${url}" target="_blank">${image.outerHTML}</a>`;
 
             setTimeout(function () {
                 updateThumbnailForStream(name, cell);
@@ -192,27 +193,22 @@
                 let name = stream.name;
 
                 let row = table.insertRow(-1);
-
                 row.insertCell(-1).textContent = name;
                 row.insertCell(-1).innerText = secondsFormatted(stream.timeMs / 1000);
 
+                const bytesIn = stream.stream.querySelector('bytes_in').textContent;
                 let inBytesCell = row.insertCell(-1);
                 inBytesCell.classList.add('text-nowrap');
-                inBytesCell.textContent = sizeFormatted(stream.bytesIn);
+                inBytesCell.textContent = formatBytes(bytesIn);
 
-                let bytesPerSecond = stream.bytesIn / (stream.timeMs / 1000);
+                const bwIn = stream.stream.querySelector('bw_in').textContent;
+                row.insertCell(-1).innerText = formatBitsPerSecond(bwIn);
 
-                row.insertCell(-1).innerText = (bytesPerSecond / 125000).toFixed(3);
+                const bytesOut = stream.stream.querySelector('bytes_out').textContent;
+                row.insertCell(-1).innerText = formatBytes(bytesOut);
 
-                let video = stream.stream.querySelector('video');
-                let audio = stream.stream.querySelector('audio');
-
-                row.insertCell(-1).innerText = video.querySelector('codec').textContent;
-                row.insertCell(-1).innerText = video.querySelector('frame_rate').textContent;
-
-                row.insertCell(-1).innerText = audio.querySelector('codec').textContent;
-                row.insertCell(-1).innerText = audio.querySelector('sample_rate').textContent;
-                row.insertCell(-1).innerText = audio.querySelector('channels').textContent;
+                const bwOut = stream.stream.querySelector('bw_out').textContent;
+                row.insertCell(-1).innerText = formatBitsPerSecond(bwOut);
 
                 let thumbCell = row.insertCell(-1);
                 updateThumbnailForStream(name, thumbCell);
