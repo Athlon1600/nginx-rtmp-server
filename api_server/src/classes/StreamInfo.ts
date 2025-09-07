@@ -1,23 +1,48 @@
-import {ffprobe} from 'fluent-ffmpeg';
-import * as Ffmpeg from "fluent-ffmpeg";
+import {spawn} from "child_process";
 
 export class StreamInfo {
 
-    static probeAsync(inputStream: string, timeout: number = 5000): Promise<Ffmpeg.FfprobeData> {
+    static probeAsync(inputStream: string, timeout: number = 5000): Promise<string> {
 
         return new Promise((resolve, reject) => {
 
+            const args = [
+                '-v', 'error',
+                '-print_format', 'json',
+                '-show_streams', '-show_format',
+                inputStream
+            ];
+
+            const ffprobe = spawn('ffprobe', args)
+
+            let stdout = "";
+            let stderr = "";
+
+            ffprobe.stdout.on("data", (chunk) => {
+                stdout += chunk.toString();
+            });
+
+            ffprobe.stderr.on("data", (chunk) => {
+                stderr += chunk.toString();
+            });
+
             setTimeout(() => {
+                ffprobe.kill("SIGKILL");
                 reject("FFProbe timed out")
             }, timeout);
 
-            ffprobe(inputStream, function (error, data) {
+            ffprobe.on('error', (err) => {
+                reject(`Failed to start ffprobe: ${err}`);
+            })
 
-                if (error) {
-                    reject(error);
+            ffprobe.on('close', (code) => {
+
+                // success
+                if (code === 0) {
+                    resolve(stdout);
+                } else {
+                    reject(`ffprobe exited with code: ${code}: ${stderr}`);
                 }
-
-                resolve(data);
 
             });
 

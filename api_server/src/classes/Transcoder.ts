@@ -1,20 +1,20 @@
 import {Util} from "../Util";
-import {FfmpegCommand} from "fluent-ffmpeg";
-import {ChildProcess} from "child_process";
+import {ChildProcess, spawn} from "child_process";
 import {M3u8} from "./M3u8";
 import {Logger} from "./Logger";
 
 const fs = require('fs');
-const ffmpeg = require('fluent-ffmpeg');
+const path = require('path');
 
 export class Transcoder {
 
     protected streamName: string;
     protected outputDirectoryName: string;
     protected enable480 = false;
-    protected command: FfmpegCommand;
 
-    protected playlistWatchInterval: NodeJS.Timer;
+    private proc: ChildProcess | null = null;
+
+    protected playlistWatchInterval: NodeJS.Timeout;
 
     // inputUri
     constructor(streamName: string) {
@@ -49,6 +49,7 @@ export class Transcoder {
         let srcPath = Util.storagePath('hls/' + dirName + '/src');
 
         // Writable directory must already exist or else ffmpeg fails
+        Logger.log(`Creating directory: ${srcPath}`);
         fs.mkdirSync(srcPath, {
             recursive: true
         });
@@ -70,10 +71,6 @@ export class Transcoder {
             // '-hls_playlist_type event',
         ];
 
-        let optionsForSource = [
-            '-c copy'
-        ].concat(defaultOutputOptions);
-
         let optionsFor480 = [
             '-c:v libx264',
             '-c:a aac',
@@ -82,66 +79,79 @@ export class Transcoder {
             '-preset veryfast',
             '-crf 23',
             '-s 854x480',
-        ].concat(defaultOutputOptions);
+        ];
 
         const streamName = this.streamName;
         const enable480 = this.enable480;
 
         const oThis = this;
 
+        let playlists = new Array<string>();
+
+        const inputSource = Util.rtmpStreamUrl(streamName);
+        const outputPath: string = srcPath + '/index.m3u8';
+
+        const args: string[] = [
+            "-re",
+            "-i", inputSource,
+            "-c", "copy",
+            ...Util.splitArgs(defaultOutputOptions),
+            outputPath
+        ];
+
+        playlists.push(outputPath);
+
         return new Promise((resolve, reject) => {
 
-            let command = ffmpeg();
+            const outBuffer = Util.fixedBuffer();
+            const errBuffer = Util.fixedBuffer();
 
-            let playlists = new Array<string>();
+            const proc = spawn("ffmpeg", args, {stdio: ["ignore", "pipe", "pipe"]});
+            proc.on("spawn", () => {
 
-            command
-                .input(Util.rtmpStreamUrl(streamName))
-                .inputOption('-re');
+                const commandLine = ["ffmpeg", ...args].join(" ");
+                Logger.log(`[ffmpeg] started as: ${commandLine}`);
 
-            command
-                .output(srcPath + '/index.m3u8')
-                .outputOptions(optionsForSource);
+                // do not create master playlist file until the playlists it is referencing exist first!
+                oThis.createMasterPlaylistWhenExist(playlists);
 
-            playlists.push(srcPath + '/index.m3u8');
+                proc.on('exit', function (code) {
+
+                    Logger.log('[ffmpeg] exited with code: ' + code);
+                    Logger.info(outBuffer.get());
+                    Logger.error(errBuffer.get());
+
+                    oThis.cleanup();
+
+                    // Finished properly
+                    if (code === 0) {
+                        resolve(true);
+                    } else {
+                        reject('Transcoder: Process exited with code: ' + code);
+                    }
+
+                });
+            });
+
+            proc.stdout.on("data", data => {
+                outBuffer.append(data);
+            });
+
+            proc.stderr.on("data", data => {
+                errBuffer.append(data);
+            });
+
+            proc.on('error', function (err: any) {
+                Logger.error('Failed to start process');
+                oThis.cleanup();
+                reject(err);
+            });
 
             if (enable480) {
-
-                command
-                    .output(mobilePath + '/index.m3u8')
-                    .outputOptions(optionsFor480);
-
-                playlists.push(mobilePath + '/index.m3u8');
+                // TODO
             }
 
-            command
-                .on('start', function (commandLine: string) {
-                    Logger.log(`[ffmpeg] Command ${commandLine}`);
-
-                    const process = command.ffmpegProc as ChildProcess;
-                    const pid = process.pid;
-
-                    Logger.log(`[ffmpeg] PID: ${pid}`);
-
-                    process.on('exit', function () {
-                        reject('Transcoder: Process exited.');
-                    });
-
-                    // do not create master playlist file until the playlists it is referencing exist first!
-                    oThis.createMasterPlaylistWhenExist(playlists);
-                })
-                .on('error', function (err: any, stdout: any, stderr: any) {
-                    oThis.cleanup();
-                    reject(err);
-                })
-                .on('end', function (stdout: any, stderr: any) {
-                    oThis.cleanup();
-                    resolve(true);
-                });
-
-            command.run();
-
-            this.command = command;
+            this.proc = proc;
 
         });
     }
@@ -184,21 +194,22 @@ export class Transcoder {
         Logger.info('Cleaning up playlist files for a stream that is now offline...');
         Logger.info('Dir: ' + userDir);
 
-        fs.rmdirSync(userDir, {
+        fs.rmSync(userDir, {
             recursive: true
         });
     }
 
     public stop(): void {
 
-        if (this.command) {
+        if (this.proc) {
 
             // Sending a signal that terminates the process will result in the error event being emitted.
-            this.command.on('error', function () {
+            this.proc.on('error', function () {
                 Logger.error('Ffmpeg has been killed');
             });
 
-            this.command.kill('SIGKILL');
+            this.proc.kill("SIGINT"); // gracefully
+            // this.proc.kill('SIGKILL'); // force kill
         }
     }
 }

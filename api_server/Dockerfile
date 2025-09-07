@@ -1,11 +1,13 @@
-FROM jrottenberg/ffmpeg:4.1-alpine AS ff
+FROM jrottenberg/ffmpeg:7.1-alpine AS ff
 
-FROM node:14-alpine
+FROM node:22-alpine
 
 RUN apk add --no-cache --update libgomp expat
 
 ## https://github.com/jrottenberg/ffmpeg/issues/99#issuecomment-396659630
-COPY --from=ff / /
+COPY --from=ff /bin/ffmpeg /bin/ffprobe /usr/local/bin/
+COPY --from=ff /lib /lib
+COPY --from=ff /share /share
 
 WORKDIR /app
 
@@ -25,5 +27,5 @@ RUN npm run build
 EXPOSE 3000
 
 CMD ["npm", "run", "start"]
-#CMD ["npm", "run", "dev"]
+# CMD ["npm", "run", "dev"]
 

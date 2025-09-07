@@ -5,6 +5,36 @@ const crypto = require("crypto");
 
 export class Util {
 
+    public static fixedBuffer(limit: number = 1024) {
+
+        let buffer: string = '';
+
+        return {
+            append(data: any) {
+                buffer += data;
+
+                if (buffer.length > limit) {
+                    buffer = buffer.slice(-limit);
+                }
+            },
+            get() {
+                return buffer;
+            }
+        }
+    }
+
+    public static splitArgs = (args: string[]) => {
+
+        const result: string[] = [];
+
+        args.forEach((arg) => {
+            const temp = arg.split(' ');
+            result.push(...temp);
+        });
+
+        return result;
+    }
+
     public static trimSlashStart(str: string) {
         return str.replace(/^\/+/, '');
     }
@@ -61,7 +91,7 @@ export class Util {
         if (typeof name !== 'string') {
             return false;
         }
-        
+
         // TODO: exclude banned words
 
         const pattern = /^[a-z][a-z0-9]{3,99}$/;

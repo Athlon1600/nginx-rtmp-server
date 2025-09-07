@@ -3,6 +3,7 @@ import {OnPublishDonePayload} from "./classes/OnPublishDonePayload";
 import {ScreenshotWorker} from "./classes/ScreenshotWorker";
 import {Transcoder} from "./classes/Transcoder";
 import {Logger} from "./classes/Logger";
+import {Util} from "./Util";
 
 // Keep a list of "open" streams
 const map = new Map<string, any>();
@@ -12,14 +13,20 @@ export class Hooks {
 
     static async onPublish(payload: OnPublishPayload): Promise<boolean> {
 
-        // rtmp://server/live/{NAME}
+        // rtmp://server/live/{STREAM_NAME}
         const name = payload.name;
 
         if (!map.has(name)) {
             map.set(name, 1);
 
+            // TODO: do ffprobe here to validate stream first
+
             const transcoder = new Transcoder(name);
-            const worker = new ScreenshotWorker(name);
+
+            const rtmpUrl = Util.rtmpStreamUrl(name);
+            let storagePath = Util.storagePath('screens/' + name + '.png');
+
+            const worker = new ScreenshotWorker(rtmpUrl, storagePath);
 
             transcoder.start()
                 .then(function () {

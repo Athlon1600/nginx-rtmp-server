@@ -2,6 +2,7 @@ import {Screenshot} from "./Screenshot";
 import {Util} from "../Util";
 import {Logger} from "./Logger";
 
+const path = require('path');
 const fs = require('fs');
 
 export class ScreenshotWorker {
@@ -9,18 +10,23 @@ export class ScreenshotWorker {
     // TOO cpu intensive!
     public static EVERY_MS = 8 * 1000;
 
-    protected name: string;
-    protected interval: NodeJS.Timer;
+    protected inputUrl: string;
+    protected outPath: string;
 
-    constructor(name: string) {
-        this.name = name;
+    protected interval: NodeJS.Timeout;
+
+    constructor(inputUrl: string, outPath: string) {
+        this.inputUrl = inputUrl;
+        this.outPath = outPath;
     }
 
     public start() {
 
-        const name = this.name;
+        const outPathAbs = path.resolve(this.outPath);
 
-        this.interval = setInterval(async function () {
+        Logger.debug(`Grabbing screenshots from: ${this.inputUrl} to ${outPathAbs}`);
+
+        this.interval = setInterval(async () => {
 
             // has to exist and be writable
             try {
@@ -29,10 +35,8 @@ export class ScreenshotWorker {
                 // do nothing
             }
 
-            let dest = Util.storagePath('screens/' + name + '.png');
-
             try {
-                await Screenshot.capture(Util.rtmpStreamUrl(name), dest);
+                await Screenshot.capture(this.inputUrl, outPathAbs);
             } catch (ex) {
                 Logger.error('Screenshot Worker error: ' + ex);
             }
