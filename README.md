@@ -8,37 +8,33 @@ Self-host your own streaming server without relying on any external and expensiv
 
 See a demo here - https://demo.streamplanet.tv/
 
-## Installation
+## :whale: Requirements
 
-Clone this repository:
-
-```shell
-git clone https://github.com/Athlon1600/nginx-rtmp-server.git
-```
-
-Next, you need Docker.
-
-**Windows**  
-If you are testing this from your local Windows computer, download Docker from here:
-https://docs.docker.com/docker-for-windows/install/
-
-**Linux**  
-Install Docker with just this one command:
-
+All you need is Docker.  
+On Linux, you can install it with just this one-liner:
 ```shell
 bash <(wget -O - https://raw.githubusercontent.com/Athlon1600/nginx-rtmp-server/master/install.sh)
 ```
 
-Once Docker is installed, run:
+## :rocket: Deployment
+
+Whether you are playing with this on your local computer, or hosting it on a real server, the steps are basically the same.  
+Things do change a lot once you actually get thousands of users though.
+
+Start by cloning this repository, and then start the services using Docker:
 
 ```shell
+git clone https://github.com/Athlon1600/nginx-rtmp-server.git
+cd nginx-rtmp-server
 docker-compose up --build -d
 ```
 
-and that is it! This will launch two services:
+and that is it! 
 
-- HTTP Nginx Server on http://localhost:8090
-- RTMP Ingest Server on `rtmp://localhost:1935`
+Assuming you are doing this from your local computer, that should launch two services:
+
+- HTTP Nginx Server on port 8090: http://localhost:8090
+- RTMP Ingest Server on port 1935: `rtmp://localhost:1935`
 
 ## Usage
 
@@ -48,7 +44,7 @@ Once the two services are up and running, you can now start streaming to your ne
 rtmp://localhost:1935/live/{stream_key}
 ```
 
-`{stream_key}` can be anything you want. In all the examples below we just use `test`.
+`{stream_key}` can be anything you want. In all the examples below we will be using `test`.
 
 If you are using OBS, point your streaming settings to:
 
