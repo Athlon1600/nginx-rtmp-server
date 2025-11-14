@@ -1,21 +1,16 @@
 FROM debian:bookworm-slim
 
-## rtmp-module was last updated May 15, 2022
+## forked rtmp-module was last updated May 15, 2022
 ## Nginx version is from 19 Oct 2022
 ENV NGINX_VERSION=1.22.1
 
-RUN apt-get update
-
-## nginx dependencies
-RUN apt-get install -y build-essential libpcre3 libpcre3-dev libssl-dev
-# RUN apt-get install -y zlib1g zlib1g-dev
-
-RUN apt-get install -y ffmpeg
+## nginx compile dependencies
+RUN apt-get update && apt-get install -y build-essential libpcre3 libpcre3-dev libssl-dev
 
 # optional. useful for debugging
-RUN apt-get install -y curl vim glances
+RUN apt-get install -y curl vim htop procps
 
-## Install nginx
+## Compile nginx from source
 RUN curl -OL https://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz
 RUN tar -zxf nginx-${NGINX_VERSION}.tar.gz
 
@@ -34,10 +29,6 @@ RUN tar -xvz -f "dev.tar.gz" && \
         --add-module=../nginx-rtmp-module-dev && \
     make -j$(nproc) && \
     make install
-
-COPY nginx.conf /usr/local/nginx/conf
-
-RUN apt-get install -y procps
 
 EXPOSE 80
 EXPOSE 1935
