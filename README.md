@@ -1,7 +1,8 @@
-![GitHub last commit](https://img.shields.io/github/last-commit/athlon1600/nginx-rtmp-server)
-![Top language](https://img.shields.io/github/languages/top/athlon1600/nginx-rtmp-server)
-
 # Video Streaming Server
+
+![GitHub last commit](https://img.shields.io/github/last-commit/athlon1600/nginx-rtmp-server)
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/athlon1600/nginx-rtmp-server/docker-build-push.yml?label=Docker%20build%20and%20push)
+![Top language](https://img.shields.io/github/languages/top/athlon1600/nginx-rtmp-server)
 
 Self-host your own streaming server without relying on any external and expensive services (like **Amazon IVS**).
 
