@@ -16,7 +16,8 @@ services:
 
   rtmp:
     container_name: 'rtmp'
-    build: './rtmp'
+    image: athlon1600/nginx-rtmp
+    # build: './rtmp'
     ports:
       - "1935:1935"
       - "${NGINX_PORT:-8090}:80"
