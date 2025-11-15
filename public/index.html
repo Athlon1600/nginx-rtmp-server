@@ -2,8 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Nginx RTMP Media Server</title>
 
@@ -15,34 +14,13 @@
 </head>
 <body>
 
-
-<div class="container mb-2">
-
-    <h1 class="my-3 text-center text-primary">Nginx RTMP Media Server</h1>
-
-    <div class="d-flex align-items-center">
-        <div class="mr-2">Point OBS to:</div>
-        <pre class="mb-0">rtmp://<span class="hostname"></span>/live/test</pre>
-    </div>
-
-    <div class="align-items-center">
-        <div class="mr-2">or stream a file via ffmpeg</div>
-        <pre class="mb-0">ffmpeg -re -i "video.mp4" -c:v libx264 -c:a aac -b:a 128k -ar 44100 -ac 2 -preset veryfast -f flv rtmp://<span
-                class="hostname"></span>/live/test</pre>
-    </div>
-
+<div class="container my-4">
+    <h1 class="text-center text-primary">Nginx RTMP Media Server</h1>
 </div>
 
 <div class="w-full px-5">
 
-    <div class="d-flex justify-content-between mb-1">
-
-        <div>
-            <a href="http://hlsanalyzer.com" target="_blank">http://hlsanalyzer.com</a>
-            <br>
-            <a href="https://hls-js.netlify.app/demo/" target="_blank">https://hls-js.netlify.app/demo/</a>
-        </div>
-
+    <div class="d-flex justify-content-between mb-2">
         <a href="/stat" target="_blank">Raw Stats</a>
     </div>
 
@@ -85,6 +63,69 @@
         </p>
     </video>
 
+
+    <div>
+
+        <hr class="my-5">
+
+        <h2 class="text-primary">Live Stream using OBS Studio</h2>
+
+        <p>
+            <strong>OBS Studio</strong> is the most popular streaming software in the world and is what most people use
+            to stream to Twitch or YouTube.
+            <br>
+
+            Download it from - <a href="https://obsproject.com/" target="_blank">https://obsproject.com/</a>
+
+        </p>
+
+        <p>
+
+            <img src="/images/obs-settings-stream-custom.jpg" width="983" height="283"
+                 alt="OBS Studio Stream settings showing server and stream key fields"
+                 title="OBS Studio Stream settings panel with server URL and stream key input fields"
+            >
+
+        </p>
+
+        <p>and then before streaming, go to your stream settings, and provide server/key values below:</p>
+
+        <div style="max-width: 500px;">
+            <div class="form-group row">
+                <label for="txt_rtmp_server" class="col-sm-4 col-form-label text-right">Server</label>
+                <div class="col-sm-8">
+                    <input type="text" class="form-control" id="txt_rtmp_server" onclick="select()" readonly>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="txt_stream_key" class="col-sm-4 col-form-label text-right">Stream Key</label>
+                <div class="col-sm-8">
+                    <input type="text" class="form-control" id="txt_stream_key" onclick="select()" readonly>
+                </div>
+            </div>
+        </div>
+
+        <hr class="my-5">
+
+        <h2 class="text-primary">Live Stream local file with FFmpeg</h2>
+
+        <p>
+            Just replace <code>"./video.mp4"</code> with path to that video file.
+        </p>
+
+        <code>
+            ffmpeg -re -i "./video.mp4" -c:v libx264 -c:a aac -b:a 128k -ar 44100 -ac 2 -preset veryfast -f flv <span
+                id="rtmp_url"></span>
+        </code>
+
+    </div>
+
+</div>
+
+<div class="text-center p-4 mt-5 bg-gradient-info bg-light border-top">
+    Powered by
+    <a href="https://github.com/Athlon1600/nginx-rtmp-server" target="_blank"
+       class="font-weight-bold">nginx-rtmp-server</a>
 </div>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
@@ -140,6 +181,15 @@
         return origin + '/' + path.replace(/^\/+/, '');
     }
 
+    function rtmpServer() {
+        return 'rtmp://' + window.location.hostname + '/live';
+    }
+
+    function randomStreamKey() {
+        let rand = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER);
+        return rand.toString(36);
+    }
+
     function updateThumbnailForStream(name, cell) {
 
         let url = rtmp_server_url('/storage/screens/' + name + '.png?ts=' + Date.now());
@@ -186,7 +236,16 @@
                 return {stream, name, timeMs, bytesIn};
             });
 
+            /** @type {HTMLTableElement} */
             let table = document.querySelector('#tbl_stats');
+
+            if (streams.length === 0) {
+                const row = table.insertRow(-1);
+                const wideCell = row.insertCell(-1);
+                wideCell.colSpan = 999;
+                wideCell.classList.add('text-center', 'p-4')
+                wideCell.textContent = 'No active streams yet';
+            }
 
             streams.forEach(function (stream) {
 
@@ -242,10 +301,21 @@
         return rtmp_server_url('/storage/hls/' + name + '/master.m3u8');
     }
 
-    $(function () {
-        $(".hostname").html(window.location.hostname);
+
+    (function () {
+
         loadStats();
-    });
+
+        const streamServer = rtmpServer();
+        const streamKey = randomStreamKey();
+
+        const serverWithKey = streamServer + '/' + streamKey;
+
+        document.getElementById('txt_rtmp_server').value = streamServer;
+        document.getElementById('txt_stream_key').value = streamKey;
+        document.getElementById('rtmp_url').textContent = serverWithKey;
+
+    })();
 
     let streamPollInterval;
 
