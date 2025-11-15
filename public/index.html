@@ -113,7 +113,7 @@
             Just replace <code>"./video.mp4"</code> with path to that video file.
         </p>
 
-        <code>
+        <code class="text-nowrap overflow-auto d-block">
             ffmpeg -re -i "./video.mp4" -c:v libx264 -c:a aac -b:a 128k -ar 44100 -ac 2 -preset veryfast -f flv <span
                 id="rtmp_url"></span>
         </code>

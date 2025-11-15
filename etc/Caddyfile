@@ -1,3 +1,8 @@
-demo.streamplanet.tv
+nginx-rtmp.athlon1600.com {
+	header Server "Athlon1600/nginx-rtmp-server"
 
-reverse_proxy localhost:8080
+	reverse_proxy {
+		to localhost:8090
+		header_down -Server
+	}
+}
