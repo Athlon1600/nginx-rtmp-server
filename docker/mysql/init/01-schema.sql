@@ -32,7 +32,7 @@ CREATE TABLE `streams` (
                            `user_ip` varchar(22) NOT NULL,
                            `started_at` timestamp NOT NULL,
                            `ended_at` timestamp NULL DEFAULT NULL,
-                           `bytes_in` int NOT NULL DEFAULT '0',
+                           `bytes_in` bigint unsigned NOT NULL DEFAULT '0',
                            `ffprobe_json` text,
                            PRIMARY KEY (`id`),
                            KEY `name` (`name`)
