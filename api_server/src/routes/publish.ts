@@ -2,9 +2,9 @@ import {Request, Response, Router} from "express";
 import {OnPublishPayload} from "../classes/OnPublishPayload";
 import {Logger} from "../classes/Logger";
 import {Hooks} from "../hooks";
-import {StreamInfo} from "../classes/StreamInfo";
 import {Util} from "../Util";
 import {Database} from "../Database";
+import {ffprobeStreamInfo} from "../ffmpeg/ffprobe";
 
 const router: Router = Router();
 
@@ -26,7 +26,7 @@ router.post('/on_publish', async function (req: Request, res: Response) {
 
             res.on('finish', () => {
 
-                StreamInfo.probeAsync(Util.rtmpStreamUrl(params.name))
+                ffprobeStreamInfo(Util.rtmpStreamUrl(params.name))
                     .then((streamInfo) => {
 
                         Database.getInstance().createNewStream(params.name, params.addr, JSON.stringify(streamInfo));
