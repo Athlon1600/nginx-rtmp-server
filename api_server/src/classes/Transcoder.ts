@@ -1,7 +1,7 @@
 import {Util} from "../Util";
 import {ChildProcess, spawn} from "child_process";
-import {M3u8} from "./M3u8";
 import {Logger} from "./Logger";
+import {HlsMasterPlaylist} from "./HlsMasterPlaylist";
 
 const fs = require('fs');
 const path = require('path');
@@ -175,11 +175,11 @@ export class Transcoder {
     // TODO: this is a temporary solution... let ffmpeg itself generate this file
     protected createMasterPlaylist(): void {
 
-        let playlist = new M3u8();
-        playlist.addVariant('src/index.m3u8', 'src', 4500000);
+        let playlist = new HlsMasterPlaylist();
+        playlist.addVariant('src/index.m3u8', 4500000);
 
         if (this.enable480) {
-            playlist.addVariant('480p/index.m3u8', '480p', 550000);
+            playlist.addVariant('480p/index.m3u8', 550000);
         }
 
         let path = Util.storagePath('hls/' + this.outputDirectoryName + '/master.m3u8');
