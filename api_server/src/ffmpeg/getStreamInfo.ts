@@ -45,6 +45,8 @@ export const getStreamInfo = async (rtmpStreamUrl: string): Promise<StreamInfo> 
     const height = vid?.height;
     let frameRate = vid?.avg_frame_rate;
 
+    const videoBitrate = vid?.bit_rate; // in bits per second
+
     if (frameRate) {
         frameRate = frameRateAsNumber(frameRate);
     }

@@ -22,6 +22,10 @@ export class HlsMasterPlaylist {
         this.variants.set(playlistUrl, combinedAttributes);
     }
 
+    removeVariant(playlistUrl: string): void {
+        this.variants.delete(playlistUrl);
+    }
+
     toString(): string {
 
         const lines = [

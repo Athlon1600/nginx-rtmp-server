@@ -2,7 +2,7 @@ services:
 
   database:
     container_name: db
-    image: mysql:8.0.44 # last update: Oct 24, 2025
+    image: mysql:8.0.44
     command: --default-authentication-plugin=mysql_native_password
     restart: always
     environment:
@@ -12,6 +12,14 @@ services:
       - ./docker/mysql/init:/docker-entrypoint-initdb.d
     ports:
       - "${MYSQL_PORT_EXPOSE:-127.0.0.1:3306}:3306"
+
+  rtmp_notify:
+    container_name: rtmp_notify
+    build: './apps/rtmp-notify'
+    environment:
+      - CLUSTER_MODE=true
+    ports:
+      - "127.0.0.1:3000:3000"
 
   rtmp:
     container_name: 'rtmp'
@@ -23,6 +31,8 @@ services:
     volumes:
       - ./rtmp/nginx.conf:/usr/local/nginx/conf/nginx.conf
       - ./public:/usr/local/nginx/html
+#    extra_hosts:
+#      - "rtmp_notify:host-gateway"
 
   api_server:
     container_name: 'api_server'

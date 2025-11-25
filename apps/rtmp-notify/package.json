@@ -1,0 +1,11 @@
+{
+  "name": "rtmp-notify",
+  "version": "1.0.0",
+  "scripts": {
+    "cluster": "pm2 start server/index.js --name server -i max --restart-delay=3000",
+    "stop": "pm2 stop server"
+  },
+  "dependencies": {
+    "pm2": "^6.0.13"
+  }
+}
