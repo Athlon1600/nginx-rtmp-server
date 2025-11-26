@@ -16,23 +16,24 @@ services:
   rtmp_notify:
     container_name: rtmp_notify
     build: './apps/rtmp-notify'
-    environment:
-      - CLUSTER_MODE=true
+    restart: on-failure
     ports:
       - "127.0.0.1:3000:3000"
 
   rtmp:
     container_name: 'rtmp'
-    image: athlon1600/nginx-rtmp
+    image: athlon1600/nginx-rtmp:latest
     # build: './rtmp'
     ports:
       - "1935:1935"
       - "${NGINX_PORT:-8090}:80"
     volumes:
-      - ./rtmp/nginx.conf:/usr/local/nginx/conf/nginx.conf
-      - ./public:/usr/local/nginx/html
+      - ./apps/rtmp-ingest/nginx.conf:/usr/local/nginx/conf/nginx.conf
+      #- ./public:/usr/local/nginx/html
 #    extra_hosts:
 #      - "rtmp_notify:host-gateway"
+    depends_on:
+      - rtmp_notify
 
   api_server:
     container_name: 'api_server'
@@ -43,8 +44,6 @@ services:
       - ./public/storage:/var/storage
       # - ./api_server/src:/app/src
     environment:
-      - NODE_ENV=production
-      # - NODE_OPTIONS=--trace-uncaught --trace-warnings --unhandled-rejections=strict
       - DB_HOST=db
       - TSC_WATCHFILE=DynamicPriorityPolling # make watch work inside linux docker
       # - MYSQL_CONNECTION=mysql://root:password@db:3306

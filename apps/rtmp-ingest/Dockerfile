@@ -14,6 +14,7 @@ RUN apt-get install -y curl vim htop procps
 RUN curl -OL https://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz
 RUN tar -zxf nginx-${NGINX_VERSION}.tar.gz
 
+## Original rtmp module by arut stopped updating years ago, so we use this fork instead
 RUN curl -OL "https://github.com/sergey-dryabzhinsky/nginx-rtmp-module/archive/dev.tar.gz"
 RUN tar -xvz -f "dev.tar.gz" && \
     cd nginx-${NGINX_VERSION} && \
@@ -33,7 +34,6 @@ RUN tar -xvz -f "dev.tar.gz" && \
 EXPOSE 80
 EXPOSE 1935
 
-#CMD ["sleep", "1d"]
-
+# CMD ["sleep", "1d"]
 CMD ["/usr/local/nginx/sbin/nginx", "-g", "daemon off;"]
 
