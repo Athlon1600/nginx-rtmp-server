@@ -76,9 +76,16 @@ const createServer = () => {
 
         readInput().then((result) => {
 
-            result = objectFromQueryString(result);
+            const payload = objectFromQueryString(result);
+
+            // TODO: who can call these endpoints? Validate against some secret webhook token
 
             if (req.url === '/on_publish') {
+
+                onPublish(payload).then(() => {
+                    // do nothing
+                });
+
                 // return okay: 200 or 201 if stream key is valid
                 sendResponse(200);
             } else if (req.url === '/on_play') {
