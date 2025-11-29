@@ -1,6 +1,6 @@
 import {Application, Router, Request, Response} from "express";
 import {Logger} from "./Logger";
-import {routes} from "../routes";
+import {routes} from "./routes";
 
 const express = require("express");
 
