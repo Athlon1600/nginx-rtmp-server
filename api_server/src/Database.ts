@@ -1,7 +1,9 @@
 import {FieldPacket, Pool, ResultSetHeader, RowDataPacket} from "mysql2";
 import {Util} from "./Util";
 import {CONFIG} from "./config";
-import {IChannel} from "./types";
+import {IChannel, UserSchema} from "./types";
+import {validateChannelName} from "./validators";
+import {passwordHash} from "./util/password";
 
 const mysql = require('mysql2');
 
@@ -68,16 +70,18 @@ export class Database {
 
     async createChannel(name: string, ipAddress: string): Promise<IChannel> {
 
+        // will throw error
+        validateChannelName(name);
+
         if (!await this.checkIfChannelNameAvailable(name)) {
             throw "Channel with name '" + name + "' is not available";
         }
 
-        const authKey: string = Util.randomString(32, 'ak_');
         const streamKey: string = Util.generateStreamKey();
 
         const result: number = await this.insertGetId(
-            "INSERT INTO channels (created_at, ip_address, name, auth_key, stream_key) VALUES (UTC_TIMESTAMP(), ?, ?, ?, ?)",
-            [ipAddress, name, authKey, streamKey]
+            "INSERT INTO channels (created_at, name, stream_key) VALUES (UTC_TIMESTAMP(), ?, ?)",
+            [name, streamKey]
         );
 
         return this.findChannelById(result);
@@ -88,7 +92,7 @@ export class Database {
         return result.length ? result[0] : null;
     }
 
-    async findChannelByAuthToken(token: string): Promise<IChannel | null> {
+    async findChannelByStreamKey(token: string): Promise<IChannel | null> {
         const result = await this.select<IChannel>("SELECT * FROM channels WHERE stream_key = ? LIMIT 1", [token]);
         return result.length ? result[0] : null;
     }
@@ -98,17 +102,65 @@ export class Database {
         return result.length ? result[0] : null;
     }
 
-    async createNewStream(name: string, ipAddress: string, streamInfo: string): Promise<void> {
-        await this.pool.promise().execute("INSERT INTO streams (name, user_ip, started_at, ffprobe_json) VALUES (?, ?, UTC_TIMESTAMP(), ?)", [
-            name, ipAddress, streamInfo
+    async updateLiveStatusForChannel(channelId: number, isLive: boolean): Promise<void> {
+        await this.pool.promise().execute("UPDATE channels SET is_live = ? WHERE id = ? LIMIT 1", [isLive, channelId]);
+    }
+
+    async createNewStream(channelId: number, ipAddress: string, onPublishPayload: string): Promise<void> {
+
+        const publicId = Util.randomString(16, 'str_');
+
+        await this.pool.promise().execute("INSERT INTO streams (public_id, channel_id, client_ip, started_at, publish_payload) VALUES (?, ?, ?, UTC_TIMESTAMP(), ?)", [
+            publicId, channelId, ipAddress, onPublishPayload
         ]);
     }
 
-    async updateStreamInfo(name: string, bytesIn: number): Promise<void> {
+    async endStream(channelId: number, bytesIn: number): Promise<void> {
 
-        await this.pool.promise().execute("UPDATE streams SET ended_at = UTC_TIMESTAMP(), bytes_in = ? WHERE name = ?", [
-            bytesIn,
-            name
-        ]);
+        await this.pool.promise().execute(
+            "UPDATE streams SET ended_at = UTC_TIMESTAMP(), bytes_in = ? WHERE channel_id = ? AND ended_at IS NULL LIMIT 1", [
+                bytesIn, channelId
+            ]);
+    }
+
+    async findById(userId: number): Promise<UserSchema> {
+
+        const result = await this.select<UserSchema>(
+            `SELECT *
+             FROM users
+             WHERE id = ? LIMIT 1`, [userId]
+        );
+
+        const first = result[0] as UserSchema;
+        return first ? Util.snakeToCamel(first) : null;
+    }
+
+    async findByUsername(username: string): Promise<UserSchema> {
+
+        const result = await this.select<UserSchema>(
+            `SELECT *
+             FROM users
+             WHERE username = ? LIMIT 1`, [username]
+        );
+
+        const first = result[0] as UserSchema;
+        return first ? Util.snakeToCamel(first) : null;
+    }
+
+    async createUserWithPassword(username: string, password: string): Promise<UserSchema> {
+
+        const hashedPassword = await passwordHash(password);
+        const authToken = Util.randomString(32);
+
+        const result = await this.insertGetId(
+            `INSERT INTO users (created_at, username, password, auth_token)
+             VALUES (UTC_TIMESTAMP(), ?, ?, ?)`, [username, hashedPassword, authToken]
+        );
+
+        if (result) {
+            return this.findById(result);
+        }
+
+        return null;
     }
 }
