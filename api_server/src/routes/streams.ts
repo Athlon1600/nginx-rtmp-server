@@ -8,12 +8,7 @@ const router = Router();
 router.get('/streams', (req: Request, res: Response) => {
 
     return res.json({
-        streams: [
-            {
-                username: "pewdiepie",
-                started: (new Date()).getUTCMilliseconds()
-            }
-        ]
+        live: []
     })
 });
 
@@ -21,15 +16,18 @@ router.get('/streams', (req: Request, res: Response) => {
 router.post('/streams', (req: Request, res: Response) => {
 
     const payload: OnPublishPayload = req.body;
-    console.log(payload);
 
     if (payload.name) {
 
         StreamService.startStreamFromStreamKeyOrFail(payload.name, payload).then(() => {
             res.status(201);
         }).catch(() => {
+
+            // res.status(409).send('Another stream in progress');
+            // res.status(503).send("no encoding capacity available");
+
             res.status(401);
-        })
+        });
 
     } else {
         res.status(400);
@@ -40,12 +38,11 @@ router.post('/streams', (req: Request, res: Response) => {
 router.post('/streams/end', (req: Request, res: Response) => {
 
     const payload: OnPublishDonePayload = req.body;
-    console.log(payload);
 
     if (payload.name) {
 
         setTimeout(() => {
-            StreamService.endStreamFromStreamKey(payload.name, payload);
+            StreamService.endStreamByStreamKey(payload.name, payload);
         }, 1);
     }
 

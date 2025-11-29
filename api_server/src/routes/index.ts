@@ -1,6 +1,7 @@
 import {Request, Response, Router} from 'express';
 import {HealthCheckService} from "../services/HealthCheckService";
 import {authRouter} from "./auth";
+import {streamsRouter} from "./streams";
 
 const router: Router = Router();
 
@@ -18,6 +19,7 @@ router.get('/', function (req: Request, res: Response) {
 });
 
 router.use('/auth', authRouter);
+router.use('/streams', streamsRouter);
 
 router.get('/health', async (req, res) => {
 
