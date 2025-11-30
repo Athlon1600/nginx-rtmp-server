@@ -1,6 +1,5 @@
-import {OnPublishPayload} from "../classes/OnPublishPayload";
-import {OnPublishDonePayload} from "../classes/OnPublishDonePayload";
 import {Database} from "../Database";
+import {OnPublishDonePayload, OnPublishPayload} from "../types/rtmp";
 
 export class StreamService {
 

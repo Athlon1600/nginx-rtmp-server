@@ -1,7 +1,6 @@
 import {Request, Response, Router} from "express";
-import {OnPublishPayload} from "../classes/OnPublishPayload";
 import {StreamService} from "../services/StreamService";
-import {OnPublishDonePayload} from "../classes/OnPublishDonePayload";
+import {OnPublishDonePayload, OnPublishPayload} from "../types/rtmp";
 
 const router = Router();
 
