@@ -18,7 +18,7 @@ RUN apt-get update && apt-get install -y build-essential libpcre3 libpcre3-dev l
     curl -L https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz | tar -xJf - && \
         mv ffmpeg-*-static/ffmpeg /usr/local/bin/ && \
         mv ffmpeg-*-static/ffprobe /usr/local/bin/ && \
-        rm -rf ffmpeg-*-static \
+        rm -rf ffmpeg-*-static; \
 fi && \
     rm -rf /var/lib/apt/lists/*
 
