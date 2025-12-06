@@ -3,11 +3,10 @@ FROM debian:bookworm-slim
 ## forked rtmp-module was last updated May 15, 2022
 ## Nginx version is from 19 Oct 2022
 ARG NGINX_VERSION=1.22.1
-
 ARG INSTALL_FFMPEG=false
 
 ## meta
-LABEL org.opencontainers.image.title="Nginx compiled from source with RTMP module, and optionally FFmpeg."
+LABEL org.opencontainers.image.title="Nginx compiled from source with RTMP module. Optionally installs FFmpeg."
 LABEL org.opencontainers.image.authors="Athlon1600"
 LABEL org.opencontainers.image.source="https://github.com/Athlon1600/nginx-rtmp-server"
 
@@ -34,7 +33,7 @@ RUN tar -xvz -f "dev.tar.gz" && \
     cd nginx-${NGINX_VERSION} && \
     ./configure \
         --prefix=/usr/local/nginx \
-        --conf-path=/usr/local/nginx/conf/nginx.conf \
+        --conf-path=/etc/nginx/nginx.conf \
         --http-log-path=/var/log/nginx/access.log \
         --error-log-path=/var/log/nginx/error.log \
         --without-http_gzip_module \
@@ -54,10 +53,13 @@ RUN ln -sf /dev/stdout /var/log/nginx/access.log && \
 
 # Set up config file
 COPY nginx.conf /etc/nginx/nginx.conf
+RUN mkdir -p /var/www/
+
+# matters for long lasting RTMP connections
+STOPSIGNAL SIGQUIT
 
 EXPOSE 80
 EXPOSE 1935
 
 # CMD ["sleep", "1d"]
 CMD ["/usr/local/nginx/sbin/nginx", "-g", "daemon off;"]
-
